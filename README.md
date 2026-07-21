@@ -1,5 +1,7 @@
 # Granola Clone — built on Recall.ai's Desktop Recording SDK
 
+[![CI](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml/badge.svg)](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml)
+
 A demo AI meeting notepad, in the spirit of [Granola](docs/granola.md), built to showcase [Recall.ai](https://recall.ai)'s meeting platform for prospective customers building similar products.
 
 Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's **Desktop Recording SDK** to detect and capture meetings locally, without ever adding a visible participant to the call — matching how Granola itself actually works.
@@ -20,26 +22,31 @@ Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's 
 - **Recording + media shortcuts** — `media_shortcuts.video_mixed` for post-call playback
 - **Webhook signature verification** — HMAC verification per Recall's Svix-based scheme
 
-Full rationale and data flow: [`docs/architecture.md`](docs/architecture.md).
+Full rationale and data flow: [`docs/architecture.md`](docs/architecture.md). For exactly where each Recall API/SDK call and webhook lives in the code, see [`docs/recall-snippets.md`](docs/recall-snippets.md).
 
 ## Repository structure
 
 ```
 backend/    Next.js (API routes only) — issues SDK upload tokens, receives Recall webhooks, runs AI note synthesis, persists data (Prisma/SQLite)
 desktop/    Electron Forge + React app — the user-facing notepad client, built on @recallai/desktop-sdk
-docs/       Architecture and product background notes
+docs/       Architecture, Recall feature map, and product background notes
+Makefile    Every setup/lint/typecheck/test/format command below, and what CI runs (`make ci`)
 ```
 
 ## Setup
 
 You'll run three things locally: the backend, a public tunnel to it (for Recall's webhook), and the desktop app.
 
+`make setup` installs both projects' dependencies plus the root-level git
+hooks in one shot; the individual `npm install` steps below do the same
+thing per-project if you'd rather run them by hand.
+
 **1. Backend**
 
 ```bash
 cd backend
 cp .env.example .env   # fill in the values below
-npm install
+npm install             # also generates the Prisma client (postinstall)
 npx prisma migrate dev
 npm run dev             # http://localhost:3000
 ```
@@ -75,6 +82,22 @@ npm start   # backend must already be running
 See [`desktop/README.md`](desktop/README.md) for macOS permissions setup (required once, in dev mode) and app structure.
 
 > **Dev note:** if you add or change an `ipcMain.handle`/event listener in `desktop/src/main.ts`, fully restart `npm start` (kill the process, don't rely on the Vite hot-reload log line). Electron's `app.on("ready")` only fires once per real OS process, so newly-registered handlers won't take effect until a real restart — a stale process will throw `No handler registered for '<channel>'` when the renderer calls it.
+
+## Testing & CI
+
+| Command                        | What it runs                                                                           |
+| ------------------------------ | -------------------------------------------------------------------------------------- |
+| `make lint`                    | ESLint for both `backend/` and `desktop/`                                              |
+| `make typecheck`               | `tsc --noEmit` for both projects                                                       |
+| `make test`                    | Vitest unit/component tests for both projects (fast, no DB/server needed)              |
+| `make test-integration`        | Backend route-handler tests against a disposable SQLite DB (see `tests/integration/`)  |
+| `make test-e2e`                | Playwright hitting a real `next build && next start` server, Recall/OpenAI calls faked |
+| `make format` / `format-check` | Prettier write / check across the whole repo                                           |
+| `make ci`                      | All of the above, in the order CI runs them — the local way to reproduce a CI failure  |
+
+[GitHub Actions](.github/workflows/ci.yml) runs three jobs on every push/PR: **Backend** (lint, typecheck, unit, integration, e2e), **Desktop** (lint, typecheck, unit + component), and **Formatting**. Desktop intentionally has no E2E layer — its Vitest suite already covers the `useRecallSession` reducer regression that would have most benefited from one, and a full Electron+Playwright harness (packaging, IPC test hooks, a fake backend) was more complexity than this demo's scope called for.
+
+A husky **pre-commit hook** runs Prettier (via lint-staged) on staged files automatically — set up for you by `npm install`/`make setup` at the repo root.
 
 ## Why the Desktop SDK instead of a Meeting Bot
 
