@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     upload = await createSdkUpload();
   } catch (error) {
     console.error("[sdk-uploads] Create Desktop SDK Upload failed", error);
-    return NextResponse.json(
-      { error: "Failed to create Recall SDK upload" },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: "Failed to create Recall SDK upload" }, { status: 502 });
   }
 
   const body = (await request.json().catch(() => ({}))) as SdkUploadRequestBody;

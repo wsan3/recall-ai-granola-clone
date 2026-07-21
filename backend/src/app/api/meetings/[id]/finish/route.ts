@@ -77,7 +77,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }));
 
   try {
-    const aiBlocks = await synthesizeNoteBlocks({ userNotes: body.notes, utterances: synthesisInput });
+    const aiBlocks = await synthesizeNoteBlocks({
+      userNotes: body.notes,
+      utterances: synthesisInput,
+    });
     for (const block of aiBlocks) {
       const utteranceIds = block.sourceUtteranceIndexes
         .map((i) => createdUtterances[i]?.id)

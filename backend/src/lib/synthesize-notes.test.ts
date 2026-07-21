@@ -33,7 +33,10 @@ describe("synthesizeNoteBlocks", () => {
     const { synthesizeNoteBlocks } = await import("./synthesize-notes");
 
     await expect(
-      synthesizeNoteBlocks({ userNotes: "", utterances: [{ index: 0, speakerName: "Alex", text: "hi" }] })
+      synthesizeNoteBlocks({
+        userNotes: "",
+        utterances: [{ index: 0, speakerName: "Alex", text: "hi" }],
+      })
     ).rejects.toThrow(/OPENAI_API_KEY/);
     expect(parseMock).not.toHaveBeenCalled();
   });
@@ -44,7 +47,9 @@ describe("synthesizeNoteBlocks", () => {
         {
           message: {
             parsed: {
-              noteBlocks: [{ text: "The team agreed to ship by Friday.", sourceUtteranceIndexes: [0, 1] }],
+              noteBlocks: [
+                { text: "The team agreed to ship by Friday.", sourceUtteranceIndexes: [0, 1] },
+              ],
             },
           },
         },
@@ -60,7 +65,9 @@ describe("synthesizeNoteBlocks", () => {
       ],
     });
 
-    expect(result).toEqual([{ text: "The team agreed to ship by Friday.", sourceUtteranceIndexes: [0, 1] }]);
+    expect(result).toEqual([
+      { text: "The team agreed to ship by Friday.", sourceUtteranceIndexes: [0, 1] },
+    ]);
 
     const [callArgs] = parseMock.mock.calls[0];
     expect(callArgs.model).toBe("gpt-4o-mini");
@@ -74,7 +81,10 @@ describe("synthesizeNoteBlocks", () => {
     parseMock.mockResolvedValue({ choices: [{ message: { parsed: { noteBlocks: [] } } }] });
     const { synthesizeNoteBlocks } = await import("./synthesize-notes");
 
-    await synthesizeNoteBlocks({ userNotes: "   ", utterances: [{ index: 0, speakerName: null, text: "hello" }] });
+    await synthesizeNoteBlocks({
+      userNotes: "   ",
+      utterances: [{ index: 0, speakerName: null, text: "hello" }],
+    });
 
     const [callArgs] = parseMock.mock.calls[0];
     const userMessage = callArgs.messages.find((m: { role: string }) => m.role === "user").content;
@@ -86,7 +96,10 @@ describe("synthesizeNoteBlocks", () => {
     parseMock.mockResolvedValue({ choices: [{ message: { parsed: { noteBlocks: [] } } }] });
 
     const { synthesizeNoteBlocks } = await import("./synthesize-notes");
-    await synthesizeNoteBlocks({ userNotes: "", utterances: [{ index: 0, speakerName: null, text: "hi" }] });
+    await synthesizeNoteBlocks({
+      userNotes: "",
+      utterances: [{ index: 0, speakerName: null, text: "hi" }],
+    });
 
     const [callArgs] = parseMock.mock.calls[0];
     expect(callArgs.model).toBe("gpt-4.1-mini");

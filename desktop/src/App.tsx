@@ -43,7 +43,11 @@ export function App() {
 
       {screen.name === "live" && (
         <>
-          <RecordingBanner phase={session.phase} meetingWindow={session.window} errorMessage={session.errorMessage} />
+          <RecordingBanner
+            phase={session.phase}
+            meetingWindow={session.window}
+            errorMessage={session.errorMessage}
+          />
 
           <div className="grid min-h-0 flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
             <Notepad value={notes} onChange={setNotes} />
@@ -64,7 +68,10 @@ export function App() {
       )}
 
       {screen.name === "meeting-detail" && (
-        <MeetingDetail meetingId={screen.meetingId} onBack={() => setScreen({ name: "meetings" })} />
+        <MeetingDetail
+          meetingId={screen.meetingId}
+          onBack={() => setScreen({ name: "meetings" })}
+        />
       )}
     </div>
   );

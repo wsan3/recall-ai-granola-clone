@@ -40,7 +40,9 @@ async function fetchAndStoreVideoUrl(meetingId: string, recordingId: string): Pr
     const recording = await retrieveRecording(recordingId);
     const videoUrl = recording.media_shortcuts?.video_mixed?.data?.download_url;
     if (!videoUrl) {
-      console.warn(`[webhooks/recall] recording=${recordingId} has no video_mixed download_url yet`);
+      console.warn(
+        `[webhooks/recall] recording=${recordingId} has no video_mixed download_url yet`
+      );
       return;
     }
     await prisma.meeting.update({ where: { id: meetingId }, data: { videoUrl } });

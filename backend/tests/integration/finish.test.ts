@@ -43,13 +43,21 @@ describe("POST /api/meetings/:id/finish", () => {
     expect(response.status).toBe(200);
     expect(json).toEqual({ received: true });
 
-    const utterances = await prisma.utterance.findMany({ where: { meetingId: meeting.id }, orderBy: { startMs: "asc" } });
+    const utterances = await prisma.utterance.findMany({
+      where: { meetingId: meeting.id },
+      orderBy: { startMs: "asc" },
+    });
     expect(utterances).toHaveLength(2);
 
-    const participantEvents = await prisma.participantEvent.findMany({ where: { meetingId: meeting.id } });
+    const participantEvents = await prisma.participantEvent.findMany({
+      where: { meetingId: meeting.id },
+    });
     expect(participantEvents).toHaveLength(1);
 
-    const noteBlocks = await prisma.noteBlock.findMany({ where: { meetingId: meeting.id }, orderBy: { order: "asc" } });
+    const noteBlocks = await prisma.noteBlock.findMany({
+      where: { meetingId: meeting.id },
+      orderBy: { order: "asc" },
+    });
     expect(noteBlocks).toHaveLength(3); // 2 user paragraphs + 1 AI block
     expect(noteBlocks[0]).toMatchObject({ source: "user", text: "Quick notes" });
     expect(noteBlocks[1]).toMatchObject({ source: "user", text: "Second paragraph" });
@@ -74,9 +82,13 @@ describe("POST /api/meetings/:id/finish", () => {
     expect(json).toEqual({ received: true, synthesisFailed: true });
 
     expect(await prisma.utterance.count({ where: { meetingId: meeting.id } })).toBe(1);
-    const userBlocks = await prisma.noteBlock.findMany({ where: { meetingId: meeting.id, source: "user" } });
+    const userBlocks = await prisma.noteBlock.findMany({
+      where: { meetingId: meeting.id, source: "user" },
+    });
     expect(userBlocks).toHaveLength(1);
-    const aiBlocks = await prisma.noteBlock.findMany({ where: { meetingId: meeting.id, source: "ai" } });
+    const aiBlocks = await prisma.noteBlock.findMany({
+      where: { meetingId: meeting.id, source: "ai" },
+    });
     expect(aiBlocks).toHaveLength(0);
 
     const unchanged = await prisma.meeting.findUnique({ where: { id: meeting.id } });
@@ -98,7 +110,11 @@ describe("POST /api/meetings/:id/finish", () => {
   });
 
   it("returns 404 for a meeting that does not exist", async () => {
-    const response = await callFinish("does-not-exist", { notes: "", utterances: [], participantEvents: [] });
+    const response = await callFinish("does-not-exist", {
+      notes: "",
+      utterances: [],
+      participantEvents: [],
+    });
     expect(response.status).toBe(404);
   });
 });

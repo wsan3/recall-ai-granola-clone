@@ -19,12 +19,21 @@ describe("POST /api/sdk-uploads", () => {
     const { POST } = await import("@/app/api/sdk-uploads/route");
 
     const response = await POST(
-      postRequest({ windowId: "w1", title: "Weekly Sync", url: "https://meet.google.com/abc", platform: "google_meet" })
+      postRequest({
+        windowId: "w1",
+        title: "Weekly Sync",
+        url: "https://meet.google.com/abc",
+        platform: "google_meet",
+      })
     );
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual({ id: "up_test_1", upload_token: "tok_test_1", meeting_id: expect.any(String) });
+    expect(json).toEqual({
+      id: "up_test_1",
+      upload_token: "tok_test_1",
+      meeting_id: expect.any(String),
+    });
 
     const meeting = await prisma.meeting.findUnique({ where: { id: json.meeting_id } });
     expect(meeting).toMatchObject({
@@ -50,7 +59,9 @@ describe("POST /api/sdk-uploads", () => {
 
   it("returns 502 when Recall's Create Desktop SDK Upload call fails", async () => {
     const { createSdkUpload } = await import("@/lib/recall");
-    vi.mocked(createSdkUpload).mockRejectedValueOnce(new Error("Create Desktop SDK Upload failed: 500"));
+    vi.mocked(createSdkUpload).mockRejectedValueOnce(
+      new Error("Create Desktop SDK Upload failed: 500")
+    );
 
     const { POST } = await import("@/app/api/sdk-uploads/route");
     const response = await POST(postRequest({}));

@@ -11,7 +11,10 @@ const SECRET = process.env.RECALL_WORKSPACE_VERIFICATION_SECRET as string;
 
 function sign(msgId: string, timestamp: string, payload: string): string {
   const key = Buffer.from(SECRET.slice("whsec_".length), "base64");
-  const sig = crypto.createHmac("sha256", key).update(`${msgId}.${timestamp}.${payload}`).digest("base64");
+  const sig = crypto
+    .createHmac("sha256", key)
+    .update(`${msgId}.${timestamp}.${payload}`)
+    .digest("base64");
   return `v1,${sig}`;
 }
 
@@ -44,7 +47,10 @@ function lifecyclePayload(event: string, overrides: { sdkUploadId: string; recor
 describe("POST /api/webhooks/recall", () => {
   it("rejects a request with an invalid signature", async () => {
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.complete", { sdkUploadId: "up_1", recordingId: "rec_1" });
+    const payload = lifecyclePayload("sdk_upload.complete", {
+      sdkUploadId: "up_1",
+      recordingId: "rec_1",
+    });
     const request = webhookRequest(payload, { signed: false });
 
     const response = await POST(request);
@@ -53,7 +59,10 @@ describe("POST /api/webhooks/recall", () => {
 
   it("acknowledges but no-ops when no Meeting matches the sdk_upload id", async () => {
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.complete", { sdkUploadId: "unknown_upload", recordingId: "rec_1" });
+    const payload = lifecyclePayload("sdk_upload.complete", {
+      sdkUploadId: "unknown_upload",
+      recordingId: "rec_1",
+    });
 
     const response = await POST(webhookRequest(payload));
     expect(response.status).toBe(200);
@@ -67,11 +76,18 @@ describe("POST /api/webhooks/recall", () => {
       media_shortcuts: { video_mixed: { data: { download_url: "https://example.com/video.mp4" } } },
     });
 
-    const meeting = await prisma.meeting.create({ data: { sdkUploadId: "up_1", status: "recording" } });
-    await prisma.noteBlock.create({ data: { meetingId: meeting.id, order: 0, source: "user", text: "note" } });
+    const meeting = await prisma.meeting.create({
+      data: { sdkUploadId: "up_1", status: "recording" },
+    });
+    await prisma.noteBlock.create({
+      data: { meetingId: meeting.id, order: 0, source: "user", text: "note" },
+    });
 
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.complete", { sdkUploadId: "up_1", recordingId: "rec_1" });
+    const payload = lifecyclePayload("sdk_upload.complete", {
+      sdkUploadId: "up_1",
+      recordingId: "rec_1",
+    });
     const response = await POST(webhookRequest(payload));
 
     expect(response.status).toBe(200);
@@ -84,13 +100,20 @@ describe("POST /api/webhooks/recall", () => {
     const { retrieveRecording } = await import("@/lib/recall");
     vi.mocked(retrieveRecording).mockResolvedValue({
       id: "rec_2",
-      media_shortcuts: { video_mixed: { data: { download_url: "https://example.com/video2.mp4" } } },
+      media_shortcuts: {
+        video_mixed: { data: { download_url: "https://example.com/video2.mp4" } },
+      },
     });
 
-    const meeting = await prisma.meeting.create({ data: { sdkUploadId: "up_2", status: "recording" } });
+    const meeting = await prisma.meeting.create({
+      data: { sdkUploadId: "up_2", status: "recording" },
+    });
 
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.completed", { sdkUploadId: "up_2", recordingId: "rec_2" });
+    const payload = lifecyclePayload("sdk_upload.completed", {
+      sdkUploadId: "up_2",
+      recordingId: "rec_2",
+    });
     await POST(webhookRequest(payload));
 
     const updated = await prisma.meeting.findUnique({ where: { id: meeting.id } });
@@ -101,10 +124,15 @@ describe("POST /api/webhooks/recall", () => {
     const { retrieveRecording } = await import("@/lib/recall");
     vi.mocked(retrieveRecording).mockResolvedValue({ id: "rec_3", media_shortcuts: {} });
 
-    const meeting = await prisma.meeting.create({ data: { sdkUploadId: "up_3", status: "recording" } });
+    const meeting = await prisma.meeting.create({
+      data: { sdkUploadId: "up_3", status: "recording" },
+    });
 
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.complete", { sdkUploadId: "up_3", recordingId: "rec_3" });
+    const payload = lifecyclePayload("sdk_upload.complete", {
+      sdkUploadId: "up_3",
+      recordingId: "rec_3",
+    });
     const response = await POST(webhookRequest(payload));
 
     expect(response.status).toBe(200);
@@ -114,10 +142,15 @@ describe("POST /api/webhooks/recall", () => {
   });
 
   it("marks the meeting failed on sdk_upload.failed", async () => {
-    const meeting = await prisma.meeting.create({ data: { sdkUploadId: "up_4", status: "recording" } });
+    const meeting = await prisma.meeting.create({
+      data: { sdkUploadId: "up_4", status: "recording" },
+    });
 
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.failed", { sdkUploadId: "up_4", recordingId: "rec_4" });
+    const payload = lifecyclePayload("sdk_upload.failed", {
+      sdkUploadId: "up_4",
+      recordingId: "rec_4",
+    });
     await POST(webhookRequest(payload));
 
     const updated = await prisma.meeting.findUnique({ where: { id: meeting.id } });
@@ -125,10 +158,15 @@ describe("POST /api/webhooks/recall", () => {
   });
 
   it("moves the meeting to processing on sdk_upload.uploading", async () => {
-    const meeting = await prisma.meeting.create({ data: { sdkUploadId: "up_5", status: "recording" } });
+    const meeting = await prisma.meeting.create({
+      data: { sdkUploadId: "up_5", status: "recording" },
+    });
 
     const { POST } = await import("@/app/api/webhooks/recall/route");
-    const payload = lifecyclePayload("sdk_upload.uploading", { sdkUploadId: "up_5", recordingId: "rec_5" });
+    const payload = lifecyclePayload("sdk_upload.uploading", {
+      sdkUploadId: "up_5",
+      recordingId: "rec_5",
+    });
     await POST(webhookRequest(payload));
 
     const updated = await prisma.meeting.findUnique({ where: { id: meeting.id } });

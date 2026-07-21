@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORIGINAL_ENV = { ...process.env };
 
-function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
+function jsonResponse(
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(body), { status, headers });
 }
 
@@ -46,7 +50,10 @@ describe("recall.ts", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://us-west-2.recall.ai/api/v1/sdk_upload/",
-      expect.objectContaining({ method: "GET", headers: expect.objectContaining({ Authorization: "Token test-api-key" }) })
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({ Authorization: "Token test-api-key" }),
+      })
     );
   });
 
@@ -104,7 +111,9 @@ describe("recall.ts", () => {
   });
 
   it("createSdkUpload configures desktop_sdk_callback with the expected realtime events", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, { id: "up_1", upload_token: "tok_1" }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(200, { id: "up_1", upload_token: "tok_1" }));
     vi.stubGlobal("fetch", fetchMock);
 
     const { createSdkUpload } = await import("./recall");

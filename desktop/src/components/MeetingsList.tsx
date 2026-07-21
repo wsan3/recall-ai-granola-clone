@@ -16,7 +16,9 @@ export function MeetingsList({ onSelect }: { onSelect: (meetingId: string) => vo
     window.recall.listMeetings().then((result) => {
       if (cancelled) return;
       setState(
-        result.status === "ok" ? { phase: "loaded", meetings: result.meetings } : { phase: "error", message: result.error }
+        result.status === "ok"
+          ? { phase: "loaded", meetings: result.meetings }
+          : { phase: "error", message: result.error }
       );
     });
     return () => {
@@ -50,10 +52,13 @@ export function MeetingsList({ onSelect }: { onSelect: (meetingId: string) => vo
             className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-gray-50"
           >
             <div className="min-w-0">
-              <div className="truncate font-medium text-gray-800">{meeting.meetingTitle ?? "Untitled meeting"}</div>
+              <div className="truncate font-medium text-gray-800">
+                {meeting.meetingTitle ?? "Untitled meeting"}
+              </div>
               <div className="truncate text-xs text-gray-500">
-                {meeting.platform ?? "Unknown platform"} · {new Date(meeting.createdAt).toLocaleString()} ·{" "}
-                {meeting.noteBlockCount} {meeting.noteBlockCount === 1 ? "note" : "notes"}
+                {meeting.platform ?? "Unknown platform"} ·{" "}
+                {new Date(meeting.createdAt).toLocaleString()} · {meeting.noteBlockCount}{" "}
+                {meeting.noteBlockCount === 1 ? "note" : "notes"}
               </div>
             </div>
             <StatusBadge status={meeting.status} />

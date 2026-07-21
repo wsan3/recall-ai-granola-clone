@@ -12,7 +12,10 @@ import { E2E_WEBHOOK_SECRET } from "../playwright.config";
 
 function signWebhook(msgId: string, timestamp: string, payload: string): string {
   const key = Buffer.from(E2E_WEBHOOK_SECRET.slice("whsec_".length), "base64");
-  const sig = crypto.createHmac("sha256", key).update(`${msgId}.${timestamp}.${payload}`).digest("base64");
+  const sig = crypto
+    .createHmac("sha256", key)
+    .update(`${msgId}.${timestamp}.${payload}`)
+    .digest("base64");
   return `v1,${sig}`;
 }
 
@@ -27,16 +30,27 @@ function webhookHeaders(payload: string) {
   };
 }
 
-test("full meeting lifecycle: create, finish, webhook, list, detail, rename", async ({ request }) => {
+test("full meeting lifecycle: create, finish, webhook, list, detail, rename", async ({
+  request,
+}) => {
   const health = await request.get("/api/health");
   expect(health.ok()).toBeTruthy();
   expect((await health.json()).status).toBe("ok");
 
   const created = await request.post("/api/sdk-uploads", {
-    data: { windowId: "w-e2e", title: "E2E Standup", url: "https://meet.google.com/e2e", platform: "google_meet" },
+    data: {
+      windowId: "w-e2e",
+      title: "E2E Standup",
+      url: "https://meet.google.com/e2e",
+      platform: "google_meet",
+    },
   });
   expect(created.ok()).toBeTruthy();
-  const { id: sdkUploadId, meeting_id: meetingId, upload_token: uploadToken } = await created.json();
+  const {
+    id: sdkUploadId,
+    meeting_id: meetingId,
+    upload_token: uploadToken,
+  } = await created.json();
   expect(meetingId).toBeTruthy();
   expect(uploadToken).toBe("e2e_upload_token");
 
@@ -85,7 +99,9 @@ test("full meeting lifecycle: create, finish, webhook, list, detail, rename", as
   expect(aiBlock.text).toContain("[e2e-fake]");
   expect(aiBlock.sourceUtteranceIds).toHaveLength(2);
 
-  const renamed = await request.patch(`/api/meetings/${meetingId}`, { data: { meetingTitle: "Renamed via E2E" } });
+  const renamed = await request.patch(`/api/meetings/${meetingId}`, {
+    data: { meetingTitle: "Renamed via E2E" },
+  });
   expect(renamed.ok()).toBeTruthy();
   const detailAfterRename = await (await request.get(`/api/meetings/${meetingId}`)).json();
   expect(detailAfterRename.meeting.meetingTitle).toBe("Renamed via E2E");

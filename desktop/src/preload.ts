@@ -26,7 +26,11 @@ contextBridge.exposeInMainWorld("recall", {
   finishMeeting: (payload: FinishMeetingRequest): Promise<FinishMeetingResponse> =>
     ipcRenderer.invoke("finish-meeting", payload),
   listMeetings: (): Promise<ListMeetingsResult> => ipcRenderer.invoke("list-meetings"),
-  getMeeting: (meetingId: string): Promise<GetMeetingResult> => ipcRenderer.invoke("get-meeting", meetingId),
-  updateMeetingTitle: (meetingId: string, meetingTitle: string): Promise<UpdateMeetingTitleResult> =>
+  getMeeting: (meetingId: string): Promise<GetMeetingResult> =>
+    ipcRenderer.invoke("get-meeting", meetingId),
+  updateMeetingTitle: (
+    meetingId: string,
+    meetingTitle: string
+  ): Promise<UpdateMeetingTitleResult> =>
     ipcRenderer.invoke("update-meeting-title", meetingId, meetingTitle),
 });

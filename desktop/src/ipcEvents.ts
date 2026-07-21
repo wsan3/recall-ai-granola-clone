@@ -21,7 +21,12 @@ export type SdkEventPayload =
   | { type: "recording-started"; window: MeetingWindowPayload }
   | { type: "recording-ended"; window: MeetingWindowPayload }
   | { type: "realtime-event"; event: string; window: MeetingWindowPayload; data: unknown }
-  | { type: "media-capture-status"; window: MeetingWindowPayload; mediaType: string; capturing: boolean }
+  | {
+      type: "media-capture-status";
+      window: MeetingWindowPayload;
+      mediaType: string;
+      capturing: boolean;
+    }
   | { type: "error"; window?: MeetingWindowPayload; errorType: string; message: string }
   | { type: "network-status"; status: string }
   | { type: "shutdown"; code: number; signal: string };
@@ -56,8 +61,7 @@ export type FinishMeetingRequest = {
 // narrowing on a boolean `ok: true/false` field silently breaks without
 // strictNullChecks, which this project doesn't enable. See docs/challenges.md.
 export type FinishMeetingResponse =
-  | { status: "ok"; synthesisFailed?: boolean }
-  | { status: "error"; error: string };
+  { status: "ok"; synthesisFailed?: boolean } | { status: "error"; error: string };
 
 export type MeetingStatus = "recording" | "processing" | "ready" | "failed";
 
@@ -96,8 +100,10 @@ export type MeetingDetail = Omit<MeetingSummary, "noteBlockCount"> & {
   utterances: UtteranceData[];
 };
 
-export type ListMeetingsResult = { status: "ok"; meetings: MeetingSummary[] } | { status: "error"; error: string };
+export type ListMeetingsResult =
+  { status: "ok"; meetings: MeetingSummary[] } | { status: "error"; error: string };
 
-export type GetMeetingResult = { status: "ok"; meeting: MeetingDetail } | { status: "error"; error: string };
+export type GetMeetingResult =
+  { status: "ok"; meeting: MeetingDetail } | { status: "error"; error: string };
 
 export type UpdateMeetingTitleResult = { status: "ok" } | { status: "error"; error: string };

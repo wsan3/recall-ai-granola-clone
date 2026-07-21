@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  backend:
+    name: Backend (lint, typecheck, unit, integration, e2e)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # npm ci runs the postinstall script, which generates the Prisma
+      # client (schema-only, no DATABASE_URL needed - see backend/README.md).
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm run test
+
+      # Runs against a disposable SQLite file created fresh by
+      # tests/integration/global-setup.ts - no external DB needed.
+      - name: Integration tests
+        run: npm run test:integration
+
+      # Builds and starts a real (throwaway) Next.js server with
+      # E2E_TEST=1, which fakes the Recall/OpenAI calls - no real
+      # credentials needed, and no browser gets launched (request-only).
+      - name: E2E tests
+        run: npm run test:e2e
+
+  desktop:
+    name: Desktop (lint, typecheck, unit + component tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      # @recallai/desktop-sdk's install script no-ops on Linux (no native
+      # binary for this platform) - see docs/architecture.md.
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npx tsc --noEmit
+
+      - name: Unit + component tests
+        run: npm run test
+
+  format:
+    name: Formatting (Prettier)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prettier --check .

@@ -16,7 +16,10 @@ declare global {
       finishMeeting(payload: FinishMeetingRequest): Promise<FinishMeetingResponse>;
       listMeetings(): Promise<ListMeetingsResult>;
       getMeeting(meetingId: string): Promise<GetMeetingResult>;
-      updateMeetingTitle(meetingId: string, meetingTitle: string): Promise<UpdateMeetingTitleResult>;
+      updateMeetingTitle(
+        meetingId: string,
+        meetingTitle: string
+      ): Promise<UpdateMeetingTitleResult>;
     };
   }
 }

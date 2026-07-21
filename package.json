@@ -1,0 +1,13 @@
+{
+  "name": "recall-ai-granola-clone",
+  "private": true,
+  "description": "Root-level tooling only (git hooks, formatting) - backend/ and desktop/ are independent npm projects, see the Makefile for the actual dev/test/lint commands.",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.4.2"
+  }
+}

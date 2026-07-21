@@ -30,7 +30,9 @@ describe("EditableTitle", () => {
     await user.clear(input);
     await user.type(input, "New title{Enter}");
 
-    await waitFor(() => expect(window.recall.updateMeetingTitle).toHaveBeenCalledWith("m1", "New title"));
+    await waitFor(() =>
+      expect(window.recall.updateMeetingTitle).toHaveBeenCalledWith("m1", "New title")
+    );
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("New title"));
   });
 
@@ -63,7 +65,9 @@ describe("EditableTitle", () => {
 
   it("reverts the value and logs an error when saving fails", async () => {
     const user = userEvent.setup();
-    window.recall.updateMeetingTitle = vi.fn().mockResolvedValue({ status: "error", error: "network down" });
+    window.recall.updateMeetingTitle = vi
+      .fn()
+      .mockResolvedValue({ status: "error", error: "network down" });
     const onSaved = vi.fn();
 
     render(<EditableTitle meetingId="m1" title="Old title" onSaved={onSaved} />);
@@ -72,7 +76,9 @@ describe("EditableTitle", () => {
     await user.clear(input);
     await user.type(input, "New title{Enter}");
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Old title" })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Old title" })).toBeInTheDocument()
+    );
     expect(onSaved).not.toHaveBeenCalled();
   });
 });

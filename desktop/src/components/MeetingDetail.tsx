@@ -23,7 +23,9 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
     window.recall.getMeeting(meetingId).then((result) => {
       if (cancelled) return;
       setState(
-        result.status === "ok" ? { phase: "loaded", meeting: result.meeting } : { phase: "error", message: result.error }
+        result.status === "ok"
+          ? { phase: "loaded", meeting: result.meeting }
+          : { phase: "error", message: result.error }
       );
     });
     return () => {
@@ -65,7 +67,8 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
                 }
               />
               <div className="truncate text-xs text-gray-500">
-                {state.meeting.platform ?? "Unknown platform"} · {new Date(state.meeting.createdAt).toLocaleString()}
+                {state.meeting.platform ?? "Unknown platform"} ·{" "}
+                {new Date(state.meeting.createdAt).toLocaleString()}
               </div>
             </div>
             <StatusBadge status={state.meeting.status} />
@@ -82,7 +85,12 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
         <>
           {state.meeting.videoUrl ? (
             <div className="border-b border-gray-200 bg-black">
-              <video ref={videoRef} src={state.meeting.videoUrl} controls className="mx-auto max-h-64 w-full" />
+              <video
+                ref={videoRef}
+                src={state.meeting.videoUrl}
+                controls
+                className="mx-auto max-h-64 w-full"
+              />
             </div>
           ) : (
             <div className="border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500">
@@ -91,7 +99,10 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
           )}
 
           <div className="grid min-h-0 flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
-            <NotesPanel noteBlocks={state.meeting.noteBlocks} onCitationClick={handleCitationClick} />
+            <NotesPanel
+              noteBlocks={state.meeting.noteBlocks}
+              onCitationClick={handleCitationClick}
+            />
             <TranscriptPanel
               utterances={state.meeting.utterances}
               activeUtteranceIds={activeUtteranceIds}

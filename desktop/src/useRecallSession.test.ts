@@ -5,7 +5,12 @@ function apply(state: State, ...actions: Action[]): State {
   return actions.reduce(reducer, state);
 }
 
-const WINDOW = { id: "w1", title: "Standup", url: "https://meet.google.com/abc", platform: "google_meet" };
+const WINDOW = {
+  id: "w1",
+  title: "Standup",
+  url: "https://meet.google.com/abc",
+  platform: "google_meet",
+};
 
 describe("useRecallSession reducer", () => {
   it("starts in the initializing phase", () => {
@@ -13,7 +18,10 @@ describe("useRecallSession reducer", () => {
   });
 
   it("moves to waiting-for-meeting once permissions are granted from initializing", () => {
-    const state = apply(initialState, { channel: "sdk-event", payload: { type: "permissions-granted" } });
+    const state = apply(initialState, {
+      channel: "sdk-event",
+      payload: { type: "permissions-granted" },
+    });
     expect(state.phase).toBe("waiting-for-meeting");
   });
 
@@ -27,7 +35,10 @@ describe("useRecallSession reducer", () => {
     );
     expect(recording.phase).toBe("recording");
 
-    const stillRecording = reducer(recording, { channel: "sdk-event", payload: { type: "permissions-granted" } });
+    const stillRecording = reducer(recording, {
+      channel: "sdk-event",
+      payload: { type: "permissions-granted" },
+    });
     expect(stillRecording.phase).toBe("recording");
   });
 
@@ -40,7 +51,10 @@ describe("useRecallSession reducer", () => {
   });
 
   it("walks meeting-detected -> meeting-started -> recording-started through to recording", () => {
-    const detected = reducer(initialState, { channel: "sdk-event", payload: { type: "meeting-detected", window: WINDOW } });
+    const detected = reducer(initialState, {
+      channel: "sdk-event",
+      payload: { type: "meeting-detected", window: WINDOW },
+    });
     expect(detected.phase).toBe("starting-recording");
     expect(detected.window).toEqual(WINDOW);
 
@@ -51,7 +65,10 @@ describe("useRecallSession reducer", () => {
     expect(started.phase).toBe("starting-recording");
     expect(started.meetingId).toBe("m1");
 
-    const recording = reducer(started, { channel: "sdk-event", payload: { type: "recording-started", window: WINDOW } });
+    const recording = reducer(started, {
+      channel: "sdk-event",
+      payload: { type: "recording-started", window: WINDOW },
+    });
     expect(recording.phase).toBe("recording");
     expect(recording.recordingStartedAtMs).not.toBeNull();
   });
@@ -66,7 +83,10 @@ describe("useRecallSession reducer", () => {
   });
 
   it("merges partial window metadata on meeting-updated", () => {
-    const detected = reducer(initialState, { channel: "sdk-event", payload: { type: "meeting-detected", window: WINDOW } });
+    const detected = reducer(initialState, {
+      channel: "sdk-event",
+      payload: { type: "meeting-detected", window: WINDOW },
+    });
     const updated = reducer(detected, {
       channel: "sdk-event",
       payload: { type: "meeting-updated", window: { id: "w1", title: "Standup (renamed)" } },
@@ -82,13 +102,22 @@ describe("useRecallSession reducer", () => {
     const recordingState: State = { ...initialState, phase: "recording", meetingId: "m1" };
 
     it("moves recording -> ended on the first of the two events", () => {
-      const state = reducer(recordingState, { channel: "sdk-event", payload: { type: "recording-ended", window: WINDOW } });
+      const state = reducer(recordingState, {
+        channel: "sdk-event",
+        payload: { type: "recording-ended", window: WINDOW },
+      });
       expect(state.phase).toBe("ended");
     });
 
     it("does not clobber synthesizing back to ended when meeting-closed arrives after finishMeeting has started", () => {
-      const ended = reducer(recordingState, { channel: "sdk-event", payload: { type: "recording-ended", window: WINDOW } });
-      const synthesizing = reducer(ended, { channel: "local", payload: { type: "finish-started" } });
+      const ended = reducer(recordingState, {
+        channel: "sdk-event",
+        payload: { type: "recording-ended", window: WINDOW },
+      });
+      const synthesizing = reducer(ended, {
+        channel: "local",
+        payload: { type: "finish-started" },
+      });
       expect(synthesizing.phase).toBe("synthesizing");
 
       const afterMeetingClosed = reducer(synthesizing, {
@@ -100,46 +129,74 @@ describe("useRecallSession reducer", () => {
 
     it("does not clobber done back to ended", () => {
       const doneState: State = { ...recordingState, phase: "done" };
-      const state = reducer(doneState, { channel: "sdk-event", payload: { type: "meeting-closed", window: WINDOW } });
+      const state = reducer(doneState, {
+        channel: "sdk-event",
+        payload: { type: "meeting-closed", window: WINDOW },
+      });
       expect(state.phase).toBe("done");
     });
 
     it("does not clobber error back to ended", () => {
       const errorState: State = { ...recordingState, phase: "error", errorMessage: "boom" };
-      const state = reducer(errorState, { channel: "sdk-event", payload: { type: "recording-ended", window: WINDOW } });
+      const state = reducer(errorState, {
+        channel: "sdk-event",
+        payload: { type: "recording-ended", window: WINDOW },
+      });
       expect(state.phase).toBe("error");
       expect(state.errorMessage).toBe("boom");
     });
 
     it("is a no-op re-affirming ended when already ended", () => {
       const endedState: State = { ...recordingState, phase: "ended" };
-      const state = reducer(endedState, { channel: "sdk-event", payload: { type: "meeting-closed", window: WINDOW } });
+      const state = reducer(endedState, {
+        channel: "sdk-event",
+        payload: { type: "meeting-closed", window: WINDOW },
+      });
       expect(state.phase).toBe("ended");
     });
   });
 
   describe("local finish-meeting lifecycle", () => {
     it("finish-started -> finish-succeeded moves synthesizing -> done", () => {
-      const synthesizing = reducer(initialState, { channel: "local", payload: { type: "finish-started" } });
+      const synthesizing = reducer(initialState, {
+        channel: "local",
+        payload: { type: "finish-started" },
+      });
       expect(synthesizing.phase).toBe("synthesizing");
-      const done = reducer(synthesizing, { channel: "local", payload: { type: "finish-succeeded" } });
+      const done = reducer(synthesizing, {
+        channel: "local",
+        payload: { type: "finish-succeeded" },
+      });
       expect(done.phase).toBe("done");
     });
 
     it("finish-failed surfaces the error message", () => {
-      const state = reducer(initialState, { channel: "local", payload: { type: "finish-failed", message: "network error" } });
+      const state = reducer(initialState, {
+        channel: "local",
+        payload: { type: "finish-failed", message: "network error" },
+      });
       expect(state.phase).toBe("error");
       expect(state.errorMessage).toBe("network error");
     });
   });
 
   describe("transcript realtime events", () => {
-    const recordingState: State = { ...initialState, phase: "recording", recordingStartedAtMs: Date.now() - 5000 };
+    const recordingState: State = {
+      ...initialState,
+      phase: "recording",
+      recordingStartedAtMs: Date.now() - 5000,
+    };
 
     it("appends a finalized transcript.data line and clears any partial line", () => {
       const withPartial: State = {
         ...recordingState,
-        partialLine: { id: "line-x", participant: null, text: "partial...", isPartial: true, atMs: 1000 },
+        partialLine: {
+          id: "line-x",
+          participant: null,
+          text: "partial...",
+          isPartial: true,
+          atMs: 1000,
+        },
       };
       const state = reducer(withPartial, {
         channel: "sdk-event",
@@ -147,12 +204,21 @@ describe("useRecallSession reducer", () => {
           type: "realtime-event",
           event: "transcript.data",
           window: WINDOW,
-          data: { data: { words: [{ text: "Hello" }, { text: "world" }], participant: { id: 1, name: "Alex" } } },
+          data: {
+            data: {
+              words: [{ text: "Hello" }, { text: "world" }],
+              participant: { id: 1, name: "Alex" },
+            },
+          },
         },
       });
 
       expect(state.transcript).toHaveLength(1);
-      expect(state.transcript[0]).toMatchObject({ text: "Hello world", participant: { id: "1", name: "Alex" }, isPartial: false });
+      expect(state.transcript[0]).toMatchObject({
+        text: "Hello world",
+        participant: { id: "1", name: "Alex" },
+        isPartial: false,
+      });
       expect(state.partialLine).toBeNull();
     });
 
@@ -174,7 +240,12 @@ describe("useRecallSession reducer", () => {
     it("ignores a transcript event with no words", () => {
       const state = reducer(recordingState, {
         channel: "sdk-event",
-        payload: { type: "realtime-event", event: "transcript.data", window: WINDOW, data: { data: {} } },
+        payload: {
+          type: "realtime-event",
+          event: "transcript.data",
+          window: WINDOW,
+          data: { data: {} },
+        },
       });
       expect(state.transcript).toHaveLength(0);
     });
@@ -190,7 +261,9 @@ describe("useRecallSession reducer", () => {
         },
       });
       expect(speaking.activeSpeakerIds.has("7")).toBe(true);
-      expect(speaking.participantEvents).toEqual([{ type: "speech_on", participantName: "Jamie", atMs: expect.any(Number) }]);
+      expect(speaking.participantEvents).toEqual([
+        { type: "speech_on", participantName: "Jamie", atMs: expect.any(Number) },
+      ]);
 
       const stopped = reducer(speaking, {
         channel: "sdk-event",
@@ -241,7 +314,10 @@ describe("useRecallSession reducer", () => {
   });
 
   it("surfaces a top-level SDK error", () => {
-    const state = reducer(initialState, { channel: "sdk-event", payload: { type: "error", errorType: "sdk", message: "crashed" } });
+    const state = reducer(initialState, {
+      channel: "sdk-event",
+      payload: { type: "error", errorType: "sdk", message: "crashed" },
+    });
     expect(state.phase).toBe("error");
     expect(state.errorMessage).toBe("crashed");
   });
@@ -249,7 +325,10 @@ describe("useRecallSession reducer", () => {
   it("caps the debug log at 300 entries, newest first", () => {
     let state = initialState;
     for (let i = 0; i < 305; i++) {
-      state = reducer(state, { channel: "sdk-event", payload: { type: "permission-status", permission: "mic", status: String(i) } });
+      state = reducer(state, {
+        channel: "sdk-event",
+        payload: { type: "permission-status", permission: "mic", status: String(i) },
+      });
     }
     expect(state.debugLog).toHaveLength(300);
     expect(state.debugLog[0].payload).toMatchObject({ status: "304" });
@@ -259,10 +338,21 @@ describe("useRecallSession reducer", () => {
     const recordingState: State = { ...initialState, phase: "recording" };
     const a = reducer(recordingState, {
       channel: "sdk-event",
-      payload: { type: "media-capture-status", window: WINDOW, mediaType: "audio", capturing: true },
+      payload: {
+        type: "media-capture-status",
+        window: WINDOW,
+        mediaType: "audio",
+        capturing: true,
+      },
     });
-    const b = reducer(a, { channel: "sdk-event", payload: { type: "network-status", status: "online" } });
-    const c = reducer(b, { channel: "sdk-event", payload: { type: "shutdown", code: 0, signal: "SIGTERM" } });
+    const b = reducer(a, {
+      channel: "sdk-event",
+      payload: { type: "network-status", status: "online" },
+    });
+    const c = reducer(b, {
+      channel: "sdk-event",
+      payload: { type: "shutdown", code: 0, signal: "SIGTERM" },
+    });
     expect(c.phase).toBe("recording");
   });
 });

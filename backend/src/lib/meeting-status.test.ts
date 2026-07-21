@@ -28,7 +28,12 @@ describe("maybeMarkMeetingReady", () => {
   });
 
   it("does nothing when only the video has arrived (no note blocks yet)", async () => {
-    findUnique.mockResolvedValue({ id: "m1", status: "processing", videoUrl: "https://example.com/video.mp4", noteBlocks: [] });
+    findUnique.mockResolvedValue({
+      id: "m1",
+      status: "processing",
+      videoUrl: "https://example.com/video.mp4",
+      noteBlocks: [],
+    });
     const { maybeMarkMeetingReady } = await import("./meeting-status");
 
     await maybeMarkMeetingReady("m1");
@@ -37,7 +42,12 @@ describe("maybeMarkMeetingReady", () => {
   });
 
   it("does nothing when only notes have arrived (no video yet)", async () => {
-    findUnique.mockResolvedValue({ id: "m1", status: "processing", videoUrl: null, noteBlocks: [{ id: "n1" }] });
+    findUnique.mockResolvedValue({
+      id: "m1",
+      status: "processing",
+      videoUrl: null,
+      noteBlocks: [{ id: "n1" }],
+    });
     const { maybeMarkMeetingReady } = await import("./meeting-status");
 
     await maybeMarkMeetingReady("m1");

@@ -1,4 +1,5 @@
-export type Screen = { name: "live" } | { name: "meetings" } | { name: "meeting-detail"; meetingId: string };
+export type Screen =
+  { name: "live" } | { name: "meetings" } | { name: "meeting-detail"; meetingId: string };
 
 function tabClass(active: boolean): string {
   return `rounded-md px-3 py-1.5 text-sm font-medium ${
@@ -19,10 +20,16 @@ export function NavBar({
 
   return (
     <div className="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2">
-      <button className={tabClass(screen.name === "live")} onClick={() => onNavigate({ name: "live" })}>
+      <button
+        className={tabClass(screen.name === "live")}
+        onClick={() => onNavigate({ name: "live" })}
+      >
         Live meeting
       </button>
-      <button className={tabClass(onPastMeetingsTab)} onClick={() => onNavigate({ name: "meetings" })}>
+      <button
+        className={tabClass(onPastMeetingsTab)}
+        onClick={() => onNavigate({ name: "meetings" })}
+      >
         Past meetings
       </button>
 

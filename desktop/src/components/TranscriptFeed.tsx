@@ -54,7 +54,9 @@ export function TranscriptFeed({
       <h2 className="mb-2 text-sm font-semibold text-gray-500">Live transcript</h2>
       <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-2">
         {lines.length === 0 && (
-          <p className="p-4 text-sm text-gray-400">Transcript will appear here once the meeting starts.</p>
+          <p className="p-4 text-sm text-gray-400">
+            Transcript will appear here once the meeting starts.
+          </p>
         )}
         {lines.map((line) => (
           <TranscriptRow

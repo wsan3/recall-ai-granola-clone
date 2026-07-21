@@ -23,7 +23,7 @@ To grant permissions during development:
 
 1. Run `npm start`. macOS will prompt for Accessibility, Microphone, and Screen Recording.
 2. In **System Settings → Privacy & Security**, enable the permission for your terminal/IDE app (e.g. Cursor) under each of **Accessibility**, **Microphone**, and **Screen Recording**.
-   - Microphone only appears in that list *after* the app has actually attempted to access it once - if you don't see it yet, relaunch `npm start` first.
+   - Microphone only appears in that list _after_ the app has actually attempted to access it once - if you don't see it yet, relaunch `npm start` first.
 3. Fully quit and reopen the terminal/IDE app (not just the Electron process) for Accessibility/Screen Recording changes to take effect.
 4. Relaunch `npm start`. You should see a `permissions-granted` event in the app's event log.
 

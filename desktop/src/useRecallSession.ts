@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { MeetingChannelPayload, MeetingWindowPayload, SdkEventPayload } from "./ipcEvents";
-import type { Participant, ParticipantEventEntry, RawRealtimeEventData, SessionPhase, TranscriptLine } from "./types";
+import type {
+  Participant,
+  ParticipantEventEntry,
+  RawRealtimeEventData,
+  SessionPhase,
+  TranscriptLine,
+} from "./types";
 
 type LocalPayload =
   | { type: "finish-started" }
@@ -65,7 +71,10 @@ function extractTranscriptPayload(raw: unknown) {
   const inner = envelope?.data ?? envelope;
   if (!inner?.words) return null;
   return {
-    text: inner.words.map((w) => w.text).join(" ").trim(),
+    text: inner.words
+      .map((w) => w.text)
+      .join(" ")
+      .trim(),
     participant: participantFromRaw(inner.participant),
   };
 }
@@ -82,7 +91,12 @@ function relativeMs(state: State): number | null {
 
 export function reducer(state: State, action: Action): State {
   const debugLog = [
-    { id: nextLogId++, at: new Date().toLocaleTimeString(), channel: action.channel, payload: action.payload },
+    {
+      id: nextLogId++,
+      at: new Date().toLocaleTimeString(),
+      channel: action.channel,
+      payload: action.payload,
+    },
     ...state.debugLog,
   ].slice(0, 300);
 
@@ -179,7 +193,8 @@ export function reducer(state: State, action: Action): State {
           const participant = extractParticipant(payload.data);
           if (!participant) return { ...state, debugLog };
           const activeSpeakerIds = new Set(state.activeSpeakerIds);
-          const type = payload.event === "participant_events.speech_on" ? "speech_on" : "speech_off";
+          const type =
+            payload.event === "participant_events.speech_on" ? "speech_on" : "speech_off";
           if (type === "speech_on") {
             activeSpeakerIds.add(participant.id);
           } else {
@@ -192,7 +207,10 @@ export function reducer(state: State, action: Action): State {
           return { ...state, activeSpeakerIds, participantEvents, debugLog };
         }
 
-        if (payload.event === "participant_events.join" || payload.event === "participant_events.update") {
+        if (
+          payload.event === "participant_events.join" ||
+          payload.event === "participant_events.update"
+        ) {
           const participant = extractParticipant(payload.data);
           if (!participant) return { ...state, debugLog };
           const participantsById = new Map(state.participantsById);
@@ -225,8 +243,12 @@ export function useRecallSession() {
   const hasFinishedRef = useRef(false);
 
   useEffect(() => {
-    const offSdkEvent = window.recall.on("sdk-event", (payload) => dispatch({ channel: "sdk-event", payload }));
-    const offMeeting = window.recall.on("meeting", (payload) => dispatch({ channel: "meeting", payload }));
+    const offSdkEvent = window.recall.on("sdk-event", (payload) =>
+      dispatch({ channel: "sdk-event", payload })
+    );
+    const offMeeting = window.recall.on("meeting", (payload) =>
+      dispatch({ channel: "meeting", payload })
+    );
 
     return () => {
       offSdkEvent();

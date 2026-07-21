@@ -4,8 +4,20 @@ import { describe, expect, it, vi } from "vitest";
 import type { NoteBlockData } from "../ipcEvents";
 import { NotesPanel } from "./NotesPanel";
 
-const userBlock: NoteBlockData = { id: "n1", order: 0, source: "user", text: "My own note", sourceUtteranceIds: [] };
-const aiBlock: NoteBlockData = { id: "n2", order: 1, source: "ai", text: "AI-expanded note", sourceUtteranceIds: ["u1", "u2"] };
+const userBlock: NoteBlockData = {
+  id: "n1",
+  order: 0,
+  source: "user",
+  text: "My own note",
+  sourceUtteranceIds: [],
+};
+const aiBlock: NoteBlockData = {
+  id: "n2",
+  order: 1,
+  source: "ai",
+  text: "AI-expanded note",
+  sourceUtteranceIds: ["u1", "u2"],
+};
 
 describe("NotesPanel", () => {
   it("renders user and AI notes in two separate, clearly labeled sections", () => {

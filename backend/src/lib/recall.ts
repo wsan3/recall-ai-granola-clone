@@ -11,9 +11,7 @@ const RECALL_API_KEY = process.env.RECALL_API_KEY;
 
 function assertConfigured(): { region: string; apiKey: string } {
   if (!RECALL_REGION || !RECALL_API_KEY) {
-    throw new Error(
-      "RECALL_REGION and RECALL_API_KEY must be set (see backend/.env.example)."
-    );
+    throw new Error("RECALL_REGION and RECALL_API_KEY must be set (see backend/.env.example).");
   }
   return { region: RECALL_REGION, apiKey: RECALL_API_KEY };
 }
@@ -143,7 +141,10 @@ export async function retrieveRecording(recordingId: string): Promise<RecordingR
     return {
       id: recordingId,
       media_shortcuts: {
-        video_mixed: { status: { code: "done" }, data: { download_url: "https://example.com/e2e-fake-video.mp4" } },
+        video_mixed: {
+          status: { code: "done" },
+          data: { download_url: "https://example.com/e2e-fake-video.mp4" },
+        },
       },
     };
   }

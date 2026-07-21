@@ -20,7 +20,11 @@ describe("GET /api/meetings", () => {
       data: { meetingTitle: "Older meeting", platform: "zoom", createdAt: new Date("2024-01-01") },
     });
     const newer = await prisma.meeting.create({
-      data: { meetingTitle: "Newer meeting", platform: "google_meet", createdAt: new Date("2024-01-02") },
+      data: {
+        meetingTitle: "Newer meeting",
+        platform: "google_meet",
+        createdAt: new Date("2024-01-02"),
+      },
     });
     await prisma.noteBlock.createMany({
       data: [
@@ -51,7 +55,9 @@ describe("GET /api/meetings/:id", () => {
     const utterance = await prisma.utterance.create({
       data: { meetingId: meeting.id, speakerName: "Alex", text: "hello", startMs: 500 },
     });
-    await prisma.utterance.create({ data: { meetingId: meeting.id, speakerName: "Sam", text: "hi", startMs: 100 } });
+    await prisma.utterance.create({
+      data: { meetingId: meeting.id, speakerName: "Sam", text: "hi", startMs: 100 },
+    });
     await prisma.noteBlock.create({
       data: {
         meetingId: meeting.id,
@@ -87,9 +93,12 @@ describe("PATCH /api/meetings/:id", () => {
     const meeting = await prisma.meeting.create({ data: { meetingTitle: "Old title" } });
 
     const { PATCH } = await import("@/app/api/meetings/[id]/route");
-    const response = await PATCH(patchRequest(`http://localhost/api/meetings/${meeting.id}`, { meetingTitle: "New title" }), {
-      params: Promise.resolve({ id: meeting.id }),
-    });
+    const response = await PATCH(
+      patchRequest(`http://localhost/api/meetings/${meeting.id}`, { meetingTitle: "New title" }),
+      {
+        params: Promise.resolve({ id: meeting.id }),
+      }
+    );
 
     expect(response.status).toBe(200);
     const updated = await prisma.meeting.findUnique({ where: { id: meeting.id } });
@@ -100,9 +109,12 @@ describe("PATCH /api/meetings/:id", () => {
     const meeting = await prisma.meeting.create({ data: { meetingTitle: "Old title" } });
 
     const { PATCH } = await import("@/app/api/meetings/[id]/route");
-    const response = await PATCH(patchRequest(`http://localhost/api/meetings/${meeting.id}`, { meetingTitle: "   " }), {
-      params: Promise.resolve({ id: meeting.id }),
-    });
+    const response = await PATCH(
+      patchRequest(`http://localhost/api/meetings/${meeting.id}`, { meetingTitle: "   " }),
+      {
+        params: Promise.resolve({ id: meeting.id }),
+      }
+    );
 
     expect(response.status).toBe(400);
     const unchanged = await prisma.meeting.findUnique({ where: { id: meeting.id } });
@@ -111,9 +123,12 @@ describe("PATCH /api/meetings/:id", () => {
 
   it("returns 404 for a meeting that does not exist", async () => {
     const { PATCH } = await import("@/app/api/meetings/[id]/route");
-    const response = await PATCH(patchRequest("http://localhost/api/meetings/does-not-exist", { meetingTitle: "x" }), {
-      params: Promise.resolve({ id: "does-not-exist" }),
-    });
+    const response = await PATCH(
+      patchRequest("http://localhost/api/meetings/does-not-exist", { meetingTitle: "x" }),
+      {
+        params: Promise.resolve({ id: "does-not-exist" }),
+      }
+    );
     expect(response.status).toBe(404);
   });
 });

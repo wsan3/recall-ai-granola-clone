@@ -41,9 +41,7 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
-    );
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
   mainWindow.webContents.openDevTools();
@@ -89,24 +87,27 @@ async function startRecordingForMeeting(evt: MeetingDetectedEvent) {
  * OpenAI synthesis pass.
  */
 function registerIpcHandlers() {
-  ipcMain.handle("finish-meeting", async (_event, req: FinishMeetingRequest): Promise<FinishMeetingResponse> => {
-    try {
-      const { meetingId, ...body } = req;
-      const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}/finish`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) {
-        throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+  ipcMain.handle(
+    "finish-meeting",
+    async (_event, req: FinishMeetingRequest): Promise<FinishMeetingResponse> => {
+      try {
+        const { meetingId, ...body } = req;
+        const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}/finish`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+          throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+        }
+        const data = (await response.json()) as { synthesisFailed?: boolean };
+        return { status: "ok", synthesisFailed: data.synthesisFailed };
+      } catch (error) {
+        console.error("[main] Failed to finish meeting", error);
+        return { status: "error", error: String(error) };
       }
-      const data = (await response.json()) as { synthesisFailed?: boolean };
-      return { status: "ok", synthesisFailed: data.synthesisFailed };
-    } catch (error) {
-      console.error("[main] Failed to finish meeting", error);
-      return { status: "error", error: String(error) };
     }
-  });
+  );
 
   ipcMain.handle("list-meetings", async (): Promise<ListMeetingsResult> => {
     try {

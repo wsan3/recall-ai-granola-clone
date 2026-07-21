@@ -1,0 +1,28 @@
+# Dependencies / build output
+node_modules/
+.next/
+.next-e2e/
+.vite/
+.webpack/
+out/
+dist/
+build/
+
+# Generated
+backend/src/generated/
+package-lock.json
+
+# Data / artifacts
+*.db
+playwright-report/
+test-results/
+
+# Private working notes (gitignored, but keep untouched if present locally)
+docs/assessment.md
+docs/implementation-plan.md
+docs/recall-doc-gaps.md
+docs/decisions.md
+docs/challenges.md
+
+# Source reference material, not authored content - leave prose untouched.
+docs/granola.md

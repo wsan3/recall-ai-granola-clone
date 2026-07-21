@@ -8,10 +8,18 @@ const PHASE_COPY: Record<SessionPhase, { label: string; dot: string; bg: string 
     dot: "bg-gray-400",
     bg: "bg-gray-50",
   },
-  "starting-recording": { label: "Meeting detected — starting…", dot: "bg-amber-500", bg: "bg-amber-50" },
+  "starting-recording": {
+    label: "Meeting detected — starting…",
+    dot: "bg-amber-500",
+    bg: "bg-amber-50",
+  },
   recording: { label: "Recording", dot: "bg-red-500 animate-pulse", bg: "bg-red-50" },
   ended: { label: "Meeting ended — wrapping up…", dot: "bg-gray-400", bg: "bg-gray-50" },
-  synthesizing: { label: "Writing up your notes…", dot: "bg-amber-500 animate-pulse", bg: "bg-amber-50" },
+  synthesizing: {
+    label: "Writing up your notes…",
+    dot: "bg-amber-500 animate-pulse",
+    bg: "bg-amber-50",
+  },
   done: { label: "Notes ready", dot: "bg-emerald-500", bg: "bg-emerald-50" },
   error: { label: "Something went wrong", dot: "bg-red-600", bg: "bg-red-50" },
 };

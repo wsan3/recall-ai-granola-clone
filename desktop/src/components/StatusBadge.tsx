@@ -10,6 +10,8 @@ const STATUS_COPY: Record<MeetingStatus, { label: string; className: string }> =
 export function StatusBadge({ status }: { status: MeetingStatus }) {
   const copy = STATUS_COPY[status];
   return (
-    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${copy.className}`}>{copy.label}</span>
+    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${copy.className}`}>
+      {copy.label}
+    </span>
   );
 }
