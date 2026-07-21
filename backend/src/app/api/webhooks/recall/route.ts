@@ -3,9 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { verifyRequestFromRecall } from "@/lib/verify-recall-request";
 
 type SdkUploadLifecyclePayload = {
+  // Only complete/failed/uploading are actually subscribable in the dashboard
+  // today. recording_started/recording_ended are documented (with full
+  // payload examples) but not offered in the subscription UI - see
+  // docs/recall-doc-gaps.md #4. Handled here defensively in case a workspace
+  // does receive them.
   event:
     | "sdk_upload.complete"
     | "sdk_upload.failed"
+    | "sdk_upload.uploading"
     | "sdk_upload.recording_started"
     | "sdk_upload.recording_ended";
   data: {
@@ -65,6 +71,7 @@ export async function POST(request: NextRequest) {
       });
       break;
     case "sdk_upload.recording_ended":
+    case "sdk_upload.uploading":
       await prisma.meeting.update({
         where: { id: meeting.id },
         data: { recordingId, status: "processing", endedAt: new Date() },

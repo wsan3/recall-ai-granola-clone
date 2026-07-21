@@ -9,6 +9,8 @@
 docs/assessment.md
 docs/implementation-plan.md
 docs/recall-doc-gaps.md
+docs/decisions.md
+docs/challenges.md
 
 # Dependencies
 node_modules/
