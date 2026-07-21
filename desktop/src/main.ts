@@ -6,7 +6,11 @@ import { BACKEND_URL, RECALL_API_URL } from "./config";
 import type {
   FinishMeetingRequest,
   FinishMeetingResponse,
+  GetMeetingResult,
+  ListMeetingsResult,
   MeetingChannelPayload,
+  MeetingDetail,
+  MeetingSummary,
   SdkEventPayload,
 } from "./ipcEvents";
 
@@ -50,7 +54,16 @@ const createWindow = () => {
  */
 async function startRecordingForMeeting(evt: MeetingDetectedEvent) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/sdk-uploads`, { method: "POST" });
+    const response = await fetch(`${BACKEND_URL}/api/sdk-uploads`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        windowId: evt.window.id,
+        title: evt.window.title,
+        url: evt.window.url,
+        platform: evt.window.platform,
+      }),
+    });
     if (!response.ok) {
       throw new Error(`Backend returned ${response.status}`);
     }
@@ -90,6 +103,34 @@ function registerIpcHandlers() {
       return { status: "ok", synthesisFailed: data.synthesisFailed };
     } catch (error) {
       console.error("[main] Failed to finish meeting", error);
+      return { status: "error", error: String(error) };
+    }
+  });
+
+  ipcMain.handle("list-meetings", async (): Promise<ListMeetingsResult> => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/meetings`);
+      if (!response.ok) {
+        throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+      }
+      const data = (await response.json()) as { meetings: MeetingSummary[] };
+      return { status: "ok", meetings: data.meetings };
+    } catch (error) {
+      console.error("[main] Failed to list meetings", error);
+      return { status: "error", error: String(error) };
+    }
+  });
+
+  ipcMain.handle("get-meeting", async (_event, meetingId: string): Promise<GetMeetingResult> => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}`);
+      if (!response.ok) {
+        throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+      }
+      const data = (await response.json()) as { meeting: MeetingDetail };
+      return { status: "ok", meeting: data.meeting };
+    } catch (error) {
+      console.error("[main] Failed to get meeting", error);
       return { status: "error", error: String(error) };
     }
   });

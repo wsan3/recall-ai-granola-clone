@@ -58,3 +58,44 @@ export type FinishMeetingRequest = {
 export type FinishMeetingResponse =
   | { status: "ok"; synthesisFailed?: boolean }
   | { status: "error"; error: string };
+
+export type MeetingStatus = "recording" | "processing" | "ready" | "failed";
+
+/** Mirrors the shape returned by GET /api/meetings (backend/src/app/api/meetings/route.ts). */
+export type MeetingSummary = {
+  id: string;
+  meetingTitle: string | null;
+  platform: string | null;
+  meetingUrl: string | null;
+  status: MeetingStatus;
+  videoUrl: string | null;
+  createdAt: string;
+  endedAt: string | null;
+  noteBlockCount: number;
+};
+
+export type NoteBlockData = {
+  id: string;
+  order: number;
+  source: "user" | "ai";
+  text: string;
+  sourceUtteranceIds: string[];
+};
+
+export type UtteranceData = {
+  id: string;
+  speakerName: string | null;
+  text: string;
+  startMs: number;
+  endMs: number | null;
+};
+
+/** Mirrors the shape returned by GET /api/meetings/:id (backend/src/app/api/meetings/[id]/route.ts). */
+export type MeetingDetail = Omit<MeetingSummary, "noteBlockCount"> & {
+  noteBlocks: NoteBlockData[];
+  utterances: UtteranceData[];
+};
+
+export type ListMeetingsResult = { status: "ok"; meetings: MeetingSummary[] } | { status: "error"; error: string };
+
+export type GetMeetingResult = { status: "ok"; meeting: MeetingDetail } | { status: "error"; error: string };

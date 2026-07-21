@@ -1,5 +1,10 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { FinishMeetingRequest, FinishMeetingResponse } from "./ipcEvents";
+import type {
+  FinishMeetingRequest,
+  FinishMeetingResponse,
+  GetMeetingResult,
+  ListMeetingsResult,
+} from "./ipcEvents";
 
 const VALID_CHANNELS = ["sdk-event", "meeting"] as const;
 export type RecallBridgeChannel = (typeof VALID_CHANNELS)[number];
@@ -19,4 +24,6 @@ contextBridge.exposeInMainWorld("recall", {
   },
   finishMeeting: (payload: FinishMeetingRequest): Promise<FinishMeetingResponse> =>
     ipcRenderer.invoke("finish-meeting", payload),
+  listMeetings: (): Promise<ListMeetingsResult> => ipcRenderer.invoke("list-meetings"),
+  getMeeting: (meetingId: string): Promise<GetMeetingResult> => ipcRenderer.invoke("get-meeting", meetingId),
 });
