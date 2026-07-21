@@ -31,7 +31,10 @@ Once the app is code-signed and packaged for distribution (`npm run make`), perm
 
 ## Structure
 
-- `src/main.ts` — owns the Desktop SDK: init, permissions, meeting-detection → upload-token → `startRecording`, and relays all SDK events to the renderer over IPC
-- `src/preload.ts` — `contextBridge` exposing a minimal `window.recall.on(channel, cb)` API to the renderer
-- `src/renderer.tsx` / `src/App.tsx` — the React UI (currently a raw event log for verification; the live notepad UI replaces this)
+- `src/main.ts` — owns the Desktop SDK: init, permissions, meeting-detection → upload-token → `startRecording`, relays all SDK events to the renderer over IPC, and proxies backend calls (`finish-meeting`, `list-meetings`, `get-meeting`) so the renderer never talks to the backend directly (avoids CORS)
+- `src/preload.ts` — `contextBridge` exposing a narrow `window.recall` API to the renderer: event subscriptions plus the three backend-proxying calls above
+- `src/useRecallSession.ts` — the live-session state machine (permissions, transcript, active speakers, participant events) plus `finishMeeting()`, fired once a meeting ends
+- `src/ipcEvents.ts` — the full main ↔ renderer IPC contract in one file, so a mismatch is a compile error
+- `src/App.tsx` — top-level view switcher: **Live meeting** (notepad + live transcript + speaker indicator), **Past meetings** (list), **Meeting Detail** (black/gray notes + video + transcript, click-to-jump citations)
+- `src/components/` — the React components for each of the above, plus a collapsible raw-event-log panel kept around for verification
 - `src/config.ts` — non-secret `BACKEND_URL` / `RECALL_API_URL` config
