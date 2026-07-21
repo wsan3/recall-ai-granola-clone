@@ -8,8 +8,14 @@ type SdkUploadLifecyclePayload = {
   // payload examples) but not offered in the subscription UI - see
   // docs/recall-doc-gaps.md #4. Handled here defensively in case a workspace
   // does receive them.
+  //
+  // A live test also produced a *second*, distinct delivery for the same
+  // sdk_upload/recording with event: "sdk_upload.completed" (trailing "d"),
+  // undocumented anywhere alongside "sdk_upload.complete" - see
+  // docs/recall-doc-gaps.md #5. Treated as an alias below.
   event:
     | "sdk_upload.complete"
+    | "sdk_upload.completed"
     | "sdk_upload.failed"
     | "sdk_upload.uploading"
     | "sdk_upload.recording_started"
@@ -78,6 +84,7 @@ export async function POST(request: NextRequest) {
       });
       break;
     case "sdk_upload.complete":
+    case "sdk_upload.completed":
       await prisma.meeting.update({
         where: { id: meeting.id },
         data: { recordingId, status: "processing" },
