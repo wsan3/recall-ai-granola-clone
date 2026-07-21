@@ -14,7 +14,7 @@ export type DebugLogEntry = {
   payload: SdkEventPayload | MeetingChannelPayload | LocalPayload;
 };
 
-type State = {
+export type State = {
   phase: SessionPhase;
   meetingId: string | null;
   window: MeetingWindowPayload | null;
@@ -29,7 +29,7 @@ type State = {
   debugLog: DebugLogEntry[];
 };
 
-const initialState: State = {
+export const initialState: State = {
   phase: "initializing",
   meetingId: null,
   window: null,
@@ -44,7 +44,7 @@ const initialState: State = {
   debugLog: [],
 };
 
-type Action =
+export type Action =
   | { channel: "sdk-event"; payload: SdkEventPayload }
   | { channel: "meeting"; payload: MeetingChannelPayload }
   | { channel: "local"; payload: LocalPayload };
@@ -80,7 +80,7 @@ function relativeMs(state: State): number | null {
   return state.recordingStartedAtMs === null ? null : Date.now() - state.recordingStartedAtMs;
 }
 
-function reducer(state: State, action: Action): State {
+export function reducer(state: State, action: Action): State {
   const debugLog = [
     { id: nextLogId++, at: new Date().toLocaleTimeString(), channel: action.channel, payload: action.payload },
     ...state.debugLog,

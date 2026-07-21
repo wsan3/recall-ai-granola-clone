@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: process.env.PUBLIC_API_BASE_URL
     ? [new URL(process.env.PUBLIC_API_BASE_URL).hostname]
     : [],
+  // Playwright E2E builds/starts a second server against a separate SQLite
+  // file (see playwright.config.ts) - give it its own build output dir too,
+  // so it never touches .next/ while a real `npm run dev` is also running.
+  distDir: process.env.E2E_TEST === "1" ? ".next-e2e" : ".next",
 };
 
 export default nextConfig;

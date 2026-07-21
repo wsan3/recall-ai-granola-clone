@@ -81,6 +81,13 @@ export type CreateSdkUploadResponse = {
 };
 
 export async function createSdkUpload(): Promise<CreateSdkUploadResponse> {
+  // E2E_TEST lets the Playwright suite exercise the full create -> finish ->
+  // webhook -> ready flow against a live `next dev` server without real
+  // Recall credentials. Never set in production - see docs/architecture.md.
+  if (process.env.E2E_TEST === "1") {
+    return { id: `e2e_upload_${crypto.randomUUID()}`, upload_token: "e2e_upload_token" };
+  }
+
   const response = await recallFetch("/api/v1/sdk_upload/", {
     method: "POST",
     body: {
@@ -132,6 +139,15 @@ export type RecordingResource = {
 };
 
 export async function retrieveRecording(recordingId: string): Promise<RecordingResource> {
+  if (process.env.E2E_TEST === "1") {
+    return {
+      id: recordingId,
+      media_shortcuts: {
+        video_mixed: { status: { code: "done" }, data: { download_url: "https://example.com/e2e-fake-video.mp4" } },
+      },
+    };
+  }
+
   const response = await recallFetch(`/api/v1/recording/${recordingId}/`);
 
   if (!response.ok) {

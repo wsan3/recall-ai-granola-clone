@@ -49,6 +49,18 @@ export async function synthesizeNoteBlocks(params: {
     return [];
   }
 
+  // E2E_TEST lets the Playwright suite exercise the full finish/synthesis
+  // flow against a live `next dev` server without a real OpenAI key. Never
+  // set in production - see docs/architecture.md.
+  if (process.env.E2E_TEST === "1") {
+    return [
+      {
+        text: "[e2e-fake] Synthesized note covering the whole transcript.",
+        sourceUtteranceIndexes: params.utterances.map((u) => u.index),
+      },
+    ];
+  }
+
   const apiKey = assertConfigured();
   const client = new OpenAI({ apiKey });
 

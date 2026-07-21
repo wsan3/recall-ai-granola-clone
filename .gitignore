@@ -22,6 +22,7 @@ dist/
 out/
 build/
 .next/
+.next-e2e/
 .turbo/
 .webpack/
 .vite/
@@ -52,3 +53,9 @@ Thumbs.db
 
 # Env/tunnel artifacts
 .ngrok2/
+
+# Test artifacts
+playwright-report/
+test-results/
+blob-report/
+coverage/
