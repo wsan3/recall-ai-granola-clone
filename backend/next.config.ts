@@ -3,8 +3,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // The repo root also has a package-lock.json (for husky/prettier), which
-  // Next.js would otherwise mistake for a second workspace root.
+  // Next.js would otherwise mistake for a second workspace root. Turbopack
+  // (used by `next dev`) needs its own separate `root` option - setting only
+  // outputFileTracingRoot leaves `next dev` unable to resolve next/package.json.
   outputFileTracingRoot: path.join(__dirname),
+  turbopack: {
+    root: path.join(__dirname),
+  },
   // Backend is reached through a public ngrok tunnel in dev (Recall's
   // webhooks need a public URL); allow that origin for dev-only assets.
   allowedDevOrigins: process.env.PUBLIC_API_BASE_URL
