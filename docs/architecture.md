@@ -79,7 +79,7 @@ sequenceDiagram
 ## Backend routes
 
 - `POST /api/sdk-uploads` — proxies Create Desktop SDK Upload (`transcript.provider.recallai_streaming`, `realtime_endpoints: [{ type: "desktop_sdk_callback", events: [...] }]`), creates local `Meeting`
-- `POST /api/webhooks/recall/sdk` — verified `sdk_upload.complete`/`sdk_upload.failed` handler; on complete, fetches `Retrieve Recording` for `media_shortcuts.video_mixed`
+- `POST /api/webhooks/recall` — verified `sdk_upload.*` lifecycle handler; on complete/completed, fetches `Retrieve Recording` for `media_shortcuts.video_mixed` and stores it
 - `POST /api/meetings/:id/finish` — Electron posts final notes + client-collected utterances/participant events; triggers the OpenAI synthesis pass
 - `GET /api/meetings`, `GET /api/meetings/:id` — list/detail for the Past Meetings and Meeting Detail views
 
@@ -87,7 +87,7 @@ sequenceDiagram
 
 - Env vars: `RECALL_REGION`, `RECALL_API_KEY`, `RECALL_WORKSPACE_VERIFICATION_SECRET`, `PUBLIC_API_BASE_URL` (a static ngrok domain in dev), `OPENAI_API_KEY` — see `.env.example`
 - All Recall API calls go through a retry helper that respects `Retry-After` on 429 and backs off on 503/507
-- The SDK webhook route verifies Recall's signature before touching the payload, acknowledges immediately, and processes asynchronously
+- The SDK webhook route verifies Recall's signature before touching the payload, then processes synchronously (DB update + `Retrieve Recording` for `video_mixed` on `complete`) before acknowledging
 - Backend webhook subscribed to `sdk_upload.complete`, `sdk_upload.uploading`, `sdk_upload.failed`
 
 ## Recommended meeting platforms

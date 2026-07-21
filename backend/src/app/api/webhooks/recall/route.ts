@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyRequestFromRecall } from "@/lib/verify-recall-request";
+import { retrieveRecording } from "@/lib/recall";
+import { maybeMarkMeetingReady } from "@/lib/meeting-status";
 
 type SdkUploadLifecyclePayload = {
   // Only complete/failed/uploading are actually subscribable in the dashboard
@@ -26,6 +28,27 @@ type SdkUploadLifecyclePayload = {
     sdk_upload: { id: string; metadata: Record<string, unknown> };
   };
 };
+
+/**
+ * Fetches the recording's mixed-video download URL and stores it on the
+ * Meeting. `media_shortcuts` can lag slightly behind the `complete` webhook,
+ * so a missing URL is logged and left for the next delivery (`.complete` and
+ * `.completed` both call this) rather than treated as a hard failure.
+ */
+async function fetchAndStoreVideoUrl(meetingId: string, recordingId: string): Promise<void> {
+  try {
+    const recording = await retrieveRecording(recordingId);
+    const videoUrl = recording.media_shortcuts?.video_mixed?.data?.download_url;
+    if (!videoUrl) {
+      console.warn(`[webhooks/recall] recording=${recordingId} has no video_mixed download_url yet`);
+      return;
+    }
+    await prisma.meeting.update({ where: { id: meetingId }, data: { videoUrl } });
+    await maybeMarkMeetingReady(meetingId);
+  } catch (error) {
+    console.error(`[webhooks/recall] Failed to fetch recording=${recordingId}`, error);
+  }
+}
 
 /**
  * Receives the Svix-delivered `sdk_upload.*` lifecycle webhooks (dashboard
@@ -89,6 +112,7 @@ export async function POST(request: NextRequest) {
         where: { id: meeting.id },
         data: { recordingId, status: "processing" },
       });
+      await fetchAndStoreVideoUrl(meeting.id, recordingId);
       break;
     case "sdk_upload.failed":
       await prisma.meeting.update({
