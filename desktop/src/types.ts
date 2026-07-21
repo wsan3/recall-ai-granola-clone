@@ -4,6 +4,8 @@ export type SessionPhase =
   | "starting-recording"
   | "recording"
   | "ended"
+  | "synthesizing"
+  | "done"
   | "error";
 
 export type Participant = {
@@ -16,6 +18,23 @@ export type TranscriptLine = {
   participant: Participant | null;
   text: string;
   isPartial: boolean;
+  /**
+   * Milliseconds since recording started, captured client-side when the
+   * line was finalized. Recall's realtime-event payloads don't document a
+   * word-level timestamp for desktop_sdk_callback (see
+   * docs/recall-doc-gaps.md), so this is an approximation - good enough for
+   * "jump to roughly this moment" video-seek citations, not frame-accurate.
+   */
+  atMs: number | null;
+};
+
+/**
+ * A raw participant lifecycle event, collected for POST .../finish. `atMs` is
+ * measured the same approximate way as TranscriptLine.atMs.
+ */
+export type ParticipantEventEntry = {
+  type: "join" | "update" | "speech_on" | "speech_off";
+  participantName: string | null;
   atMs: number | null;
 };
 

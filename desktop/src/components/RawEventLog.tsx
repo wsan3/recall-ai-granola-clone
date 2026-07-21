@@ -1,11 +1,5 @@
 import { useState } from "react";
-
-type DebugLogEntry = {
-  id: number;
-  at: string;
-  channel: "sdk-event" | "meeting";
-  payload: unknown;
-};
+import type { DebugLogEntry } from "../useRecallSession";
 
 /**
  * Collapsed by default - kept around as a verification tool while the exact

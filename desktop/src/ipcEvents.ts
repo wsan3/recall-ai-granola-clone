@@ -29,3 +29,32 @@ export type SdkEventPayload =
 export type MeetingChannelPayload =
   | { type: "meeting-started"; meetingId: string; window: MeetingWindowPayload }
   | { type: "start-recording-failed"; message: string };
+
+/**
+ * Request/response for the `finish-meeting` IPC invoke, sent by the renderer
+ * once useRecallSession has a complete transcript for the call. The main
+ * process makes the actual backend call (keeps all backend HTTP calls in one
+ * place, and avoids a cross-origin fetch from the renderer to the ngrok'd
+ * dev backend).
+ */
+export type FinishMeetingRequest = {
+  meetingId: string;
+  notes: string;
+  utterances: {
+    speakerName: string | null;
+    text: string;
+    startMs: number | null;
+    endMs: number | null;
+  }[];
+  participantEvents: {
+    type: string;
+    participantName: string | null;
+  }[];
+};
+
+// A string-literal discriminant (not a boolean) - TS's discriminated-union
+// narrowing on a boolean `ok: true/false` field silently breaks without
+// strictNullChecks, which this project doesn't enable. See docs/challenges.md.
+export type FinishMeetingResponse =
+  | { status: "ok"; synthesisFailed?: boolean }
+  | { status: "error"; error: string };

@@ -1,41 +1,53 @@
-import { useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { MeetingChannelPayload, MeetingWindowPayload, SdkEventPayload } from "./ipcEvents";
-import type { Participant, RawRealtimeEventData, SessionPhase, TranscriptLine } from "./types";
+import type { Participant, ParticipantEventEntry, RawRealtimeEventData, SessionPhase, TranscriptLine } from "./types";
 
-type DebugLogEntry = {
+type LocalPayload =
+  | { type: "finish-started" }
+  | { type: "finish-succeeded" }
+  | { type: "finish-failed"; message: string };
+
+export type DebugLogEntry = {
   id: number;
   at: string;
-  channel: "sdk-event" | "meeting";
-  payload: SdkEventPayload | MeetingChannelPayload;
+  channel: "sdk-event" | "meeting" | "local";
+  payload: SdkEventPayload | MeetingChannelPayload | LocalPayload;
 };
 
 type State = {
   phase: SessionPhase;
+  meetingId: string | null;
   window: MeetingWindowPayload | null;
   permissions: Record<string, string>;
+  recordingStartedAtMs: number | null;
   transcript: TranscriptLine[];
   partialLine: TranscriptLine | null;
   activeSpeakerIds: Set<string>;
   participantsById: Map<string, Participant>;
+  participantEvents: ParticipantEventEntry[];
   errorMessage: string | null;
   debugLog: DebugLogEntry[];
 };
 
 const initialState: State = {
   phase: "initializing",
+  meetingId: null,
   window: null,
   permissions: {},
+  recordingStartedAtMs: null,
   transcript: [],
   partialLine: null,
   activeSpeakerIds: new Set(),
   participantsById: new Map(),
+  participantEvents: [],
   errorMessage: null,
   debugLog: [],
 };
 
 type Action =
   | { channel: "sdk-event"; payload: SdkEventPayload }
-  | { channel: "meeting"; payload: MeetingChannelPayload };
+  | { channel: "meeting"; payload: MeetingChannelPayload }
+  | { channel: "local"; payload: LocalPayload };
 
 let nextLineId = 0;
 let nextLogId = 0;
@@ -64,17 +76,32 @@ function extractParticipant(raw: unknown): Participant | null {
   return participantFromRaw(inner?.participant);
 }
 
+function relativeMs(state: State): number | null {
+  return state.recordingStartedAtMs === null ? null : Date.now() - state.recordingStartedAtMs;
+}
+
 function reducer(state: State, action: Action): State {
   const debugLog = [
     { id: nextLogId++, at: new Date().toLocaleTimeString(), channel: action.channel, payload: action.payload },
     ...state.debugLog,
   ].slice(0, 300);
 
+  if (action.channel === "local") {
+    switch (action.payload.type) {
+      case "finish-started":
+        return { ...state, phase: "synthesizing", debugLog };
+      case "finish-succeeded":
+        return { ...state, phase: "done", debugLog };
+      case "finish-failed":
+        return { ...state, phase: "error", errorMessage: action.payload.message, debugLog };
+    }
+  }
+
   if (action.channel === "meeting") {
     const payload = action.payload;
     switch (payload.type) {
       case "meeting-started":
-        return { ...state, phase: "starting-recording", debugLog };
+        return { ...state, phase: "starting-recording", meetingId: payload.meetingId, debugLog };
       case "start-recording-failed":
         return { ...state, phase: "error", errorMessage: payload.message, debugLog };
     }
@@ -105,7 +132,7 @@ function reducer(state: State, action: Action): State {
         return { ...state, window: { ...state.window, ...payload.window }, debugLog };
 
       case "recording-started":
-        return { ...state, phase: "recording", debugLog };
+        return { ...state, phase: "recording", recordingStartedAtMs: Date.now(), debugLog };
 
       case "recording-ended":
       case "meeting-closed":
@@ -126,7 +153,7 @@ function reducer(state: State, action: Action): State {
             participant: parsed.participant,
             text: parsed.text,
             isPartial,
-            atMs: null,
+            atMs: relativeMs(state),
           };
           return isPartial
             ? { ...state, partialLine: line, debugLog }
@@ -140,12 +167,17 @@ function reducer(state: State, action: Action): State {
           const participant = extractParticipant(payload.data);
           if (!participant) return { ...state, debugLog };
           const activeSpeakerIds = new Set(state.activeSpeakerIds);
-          if (payload.event === "participant_events.speech_on") {
+          const type = payload.event === "participant_events.speech_on" ? "speech_on" : "speech_off";
+          if (type === "speech_on") {
             activeSpeakerIds.add(participant.id);
           } else {
             activeSpeakerIds.delete(participant.id);
           }
-          return { ...state, activeSpeakerIds, debugLog };
+          const participantEvents: ParticipantEventEntry[] = [
+            ...state.participantEvents,
+            { type, participantName: participant.name, atMs: relativeMs(state) },
+          ];
+          return { ...state, activeSpeakerIds, participantEvents, debugLog };
         }
 
         if (payload.event === "participant_events.join" || payload.event === "participant_events.update") {
@@ -153,7 +185,12 @@ function reducer(state: State, action: Action): State {
           if (!participant) return { ...state, debugLog };
           const participantsById = new Map(state.participantsById);
           participantsById.set(participant.id, participant);
-          return { ...state, participantsById, debugLog };
+          const type = payload.event === "participant_events.join" ? "join" : "update";
+          const participantEvents: ParticipantEventEntry[] = [
+            ...state.participantEvents,
+            { type, participantName: participant.name, atMs: relativeMs(state) },
+          ];
+          return { ...state, participantsById, participantEvents, debugLog };
         }
 
         return { ...state, debugLog };
@@ -171,6 +208,9 @@ function reducer(state: State, action: Action): State {
 
 export function useRecallSession() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const hasFinishedRef = useRef(false);
 
   useEffect(() => {
     const offSdkEvent = window.recall.on("sdk-event", (payload) => dispatch({ channel: "sdk-event", payload }));
@@ -182,5 +222,39 @@ export function useRecallSession() {
     };
   }, []);
 
-  return state;
+  /**
+   * Sends the client-collected transcript + participant events + the user's
+   * own notepad text to the backend for persistence and AI synthesis. Safe
+   * to call more than once (e.g. from an effect on phase change) - only the
+   * first call after a meeting starts actually fires.
+   */
+  const finishMeeting = useCallback(async (notes: string) => {
+    const current = stateRef.current;
+    if (hasFinishedRef.current || !current.meetingId) return;
+    hasFinishedRef.current = true;
+    dispatch({ channel: "local", payload: { type: "finish-started" } });
+
+    const result = await window.recall.finishMeeting({
+      meetingId: current.meetingId,
+      notes,
+      utterances: current.transcript.map((line) => ({
+        speakerName: line.participant?.name ?? null,
+        text: line.text,
+        startMs: line.atMs,
+        endMs: null,
+      })),
+      participantEvents: current.participantEvents.map((event) => ({
+        type: event.type,
+        participantName: event.participantName,
+      })),
+    });
+
+    if (result.status === "ok") {
+      dispatch({ channel: "local", payload: { type: "finish-succeeded" } });
+    } else {
+      dispatch({ channel: "local", payload: { type: "finish-failed", message: result.error } });
+    }
+  }, []);
+
+  return { ...state, finishMeeting };
 }

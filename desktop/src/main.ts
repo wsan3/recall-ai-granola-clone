@@ -1,9 +1,14 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import RecallAiSdk, { type MeetingDetectedEvent } from "@recallai/desktop-sdk";
 import { BACKEND_URL, RECALL_API_URL } from "./config";
-import type { MeetingChannelPayload, SdkEventPayload } from "./ipcEvents";
+import type {
+  FinishMeetingRequest,
+  FinishMeetingResponse,
+  MeetingChannelPayload,
+  SdkEventPayload,
+} from "./ipcEvents";
 
 if (started) {
   app.quit();
@@ -61,6 +66,33 @@ async function startRecordingForMeeting(evt: MeetingDetectedEvent) {
     console.error("[main] Failed to start recording", error);
     send("meeting", { type: "start-recording-failed", message: String(error) });
   }
+}
+
+/**
+ * Called by the renderer (useRecallSession) once a meeting has ended and it
+ * has assembled the full client-side transcript. Proxies to our backend's
+ * POST /api/meetings/:id/finish, which persists the transcript and runs the
+ * OpenAI synthesis pass.
+ */
+function registerIpcHandlers() {
+  ipcMain.handle("finish-meeting", async (_event, req: FinishMeetingRequest): Promise<FinishMeetingResponse> => {
+    try {
+      const { meetingId, ...body } = req;
+      const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}/finish`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+      }
+      const data = (await response.json()) as { synthesisFailed?: boolean };
+      return { status: "ok", synthesisFailed: data.synthesisFailed };
+    } catch (error) {
+      console.error("[main] Failed to finish meeting", error);
+      return { status: "error", error: String(error) };
+    }
+  });
 }
 
 function registerSdkListeners() {
@@ -136,6 +168,7 @@ function registerSdkListeners() {
 
 app.on("ready", async () => {
   createWindow();
+  registerIpcHandlers();
   registerSdkListeners();
 
   await RecallAiSdk.init({ apiUrl: RECALL_API_URL });
