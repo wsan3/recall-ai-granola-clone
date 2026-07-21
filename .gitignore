@@ -3,6 +3,13 @@
 .env.*
 !.env.example
 
+# Assessment-process artifacts: this repo is meant to read as a genuine
+# Recall.ai customer reference app, not as a take-home assignment. Keep the
+# interview brief and my own working/planning notes local-only.
+docs/assessment.md
+docs/implementation-plan.md
+docs/recall-doc-gaps.md
+
 # Dependencies
 node_modules/
 .pnp

@@ -2,18 +2,18 @@
 
 A demo AI meeting notepad, in the spirit of [Granola](docs/granola.md), built to showcase [Recall.ai](https://recall.ai)'s meeting platform for prospective customers building similar products.
 
-Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's **Desktop Recording SDK** to detect and capture meetings locally, without ever adding a visible participant to the call — matching how Granola itself actually works. See [`docs/implementation-plan.md`](docs/implementation-plan.md) for the full architecture, rationale, and build plan, and [`docs/assessment.md`](docs/assessment.md) for the assessment this was built for.
+Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's **Desktop Recording SDK** to detect and capture meetings locally, without ever adding a visible participant to the call — matching how Granola itself actually works. See [`docs/architecture.md`](docs/architecture.md) for the full architecture, rationale, and design decisions.
 
 ## Status
 
-This project is under active development, following the checkpointed build sequence in [`docs/implementation-plan.md`](docs/implementation-plan.md). Each checkpoint is committed separately.
+This project is under active development. See the commit history for progress; each commit corresponds to one working, verified increment.
 
 ## Repository structure
 
 ```
 backend/    Next.js (API routes only) — issues SDK upload tokens, receives Recall webhooks, runs AI note synthesis, persists data (Prisma/SQLite)
 desktop/    Electron Forge + React app — the user-facing notepad client, built on @recallai/desktop-sdk
-docs/       Product background, the assessment brief, and the implementation plan
+docs/       Product background and architecture notes
 ```
 
 ## Setup
@@ -28,4 +28,4 @@ docs/       Product background, the assessment brief, and the implementation pla
 
 ## Why the Desktop SDK instead of a Meeting Bot
 
-Granola's core differentiator is that it never joins your call as a visible participant — it runs locally and detects meetings on your machine. Recall's Meeting Bot API would have been the safer, faster build (pure backend, no OS constraints), but it would produce a demo of "a generic meeting recorder," not of Granola specifically. The Desktop SDK is the primitive that actually matches Granola's real architecture, at the cost of extra client-side complexity (Electron packaging, macOS permissions, meeting-detection edge cases). That trade-off, and the alternatives considered (including Recall's botless Meeting Direct Connect), are discussed in [`docs/implementation-plan.md`](docs/implementation-plan.md).
+Granola's core differentiator is that it never joins your call as a visible participant — it runs locally and detects meetings on your machine. Recall's Meeting Bot API would have been the safer, faster build (pure backend, no OS constraints), but it would produce a demo of "a generic meeting recorder," not of Granola specifically. The Desktop SDK is the primitive that actually matches Granola's real architecture, at the cost of extra client-side complexity (Electron packaging, macOS permissions, meeting-detection edge cases). That trade-off, and the alternatives considered (including Recall's botless Meeting Direct Connect), are discussed in [`docs/architecture.md`](docs/architecture.md).
