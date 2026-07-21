@@ -1,9 +1,10 @@
-import type { RecallBridgeChannel } from "./preload";
+import type { MeetingChannelPayload, SdkEventPayload } from "./ipcEvents";
 
 declare global {
   interface Window {
     recall: {
-      on: (channel: RecallBridgeChannel, callback: (payload: unknown) => void) => () => void;
+      on(channel: "sdk-event", callback: (payload: SdkEventPayload) => void): () => void;
+      on(channel: "meeting", callback: (payload: MeetingChannelPayload) => void): () => void;
     };
   }
 }

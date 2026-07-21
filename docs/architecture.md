@@ -31,8 +31,6 @@ sequenceDiagram
     Electron->>Recall: SDK init
     Note over Electron: Meeting starts on this machine (Zoom/Meet)
     Recall-->>Electron: meeting-detected event
-    Electron->>User: "Meeting detected — Start Notetaker?"
-    User->>Electron: Confirm
     Electron->>Backend: POST /api/sdk-uploads
     Backend->>Recall: Create Desktop SDK Upload (transcript.provider, realtime_endpoints: desktop_sdk_callback)
     Backend->>DB: Create Meeting (status recording)

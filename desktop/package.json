@@ -1,8 +1,8 @@
 {
   "name": "desktop",
-  "productName": "desktop",
+  "productName": "Granola Clone",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "AI meeting notepad demo built on Recall.ai's Desktop Recording SDK",
   "main": ".vite/build/main.js",
   "private": true,
   "scripts": {
@@ -34,9 +34,12 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.5.4",
     "electron": "43.2.0",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
+    "postcss": "^8.5.21",
+    "tailwindcss": "^3.4.19",
     "typescript": "5.6",
     "vite": "^5.4.21"
   },

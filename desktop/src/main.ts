@@ -3,6 +3,7 @@ import path from "node:path";
 import started from "electron-squirrel-startup";
 import RecallAiSdk, { type MeetingDetectedEvent } from "@recallai/desktop-sdk";
 import { BACKEND_URL, RECALL_API_URL } from "./config";
+import type { MeetingChannelPayload, SdkEventPayload } from "./ipcEvents";
 
 if (started) {
   app.quit();
@@ -10,6 +11,8 @@ if (started) {
 
 let mainWindow: BrowserWindow | null = null;
 
+function send(channel: "sdk-event", payload: SdkEventPayload): void;
+function send(channel: "meeting", payload: MeetingChannelPayload): void;
 function send(channel: string, payload: unknown) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(channel, payload);
