@@ -12,6 +12,7 @@ import type {
   MeetingDetail,
   MeetingSummary,
   SdkEventPayload,
+  UpdateMeetingTitleResult,
 } from "./ipcEvents";
 
 if (started) {
@@ -134,6 +135,26 @@ function registerIpcHandlers() {
       return { status: "error", error: String(error) };
     }
   });
+
+  ipcMain.handle(
+    "update-meeting-title",
+    async (_event, meetingId: string, meetingTitle: string): Promise<UpdateMeetingTitleResult> => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ meetingTitle }),
+        });
+        if (!response.ok) {
+          throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+        }
+        return { status: "ok" };
+      } catch (error) {
+        console.error("[main] Failed to update meeting title", error);
+        return { status: "error", error: String(error) };
+      }
+    }
+  );
 }
 
 function registerSdkListeners() {

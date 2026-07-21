@@ -135,8 +135,20 @@ function reducer(state: State, action: Action): State {
         return { ...state, phase: "recording", recordingStartedAtMs: Date.now(), debugLog };
 
       case "recording-ended":
-      case "meeting-closed":
-        return { ...state, phase: "ended", debugLog };
+      case "meeting-closed": {
+        // The SDK fires both events for a single meeting ending (recording
+        // stops, then the meeting window closes shortly after). Once we've
+        // already moved past "ended" - into synthesizing/done/error via
+        // finishMeeting - a later one of these two must not clobber that
+        // progress back to "ended", or the UI gets stuck showing "wrapping
+        // up..." forever even though the finish call already succeeded.
+        const alreadyPastEnded =
+          state.phase === "ended" ||
+          state.phase === "synthesizing" ||
+          state.phase === "done" ||
+          state.phase === "error";
+        return alreadyPastEnded ? { ...state, debugLog } : { ...state, phase: "ended", debugLog };
+      }
 
       case "error":
         return { ...state, phase: "error", errorMessage: payload.message, debugLog };

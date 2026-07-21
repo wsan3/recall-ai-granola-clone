@@ -44,3 +44,33 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     },
   });
 }
+
+type PatchMeetingBody = {
+  meetingTitle?: string;
+};
+
+/**
+ * Lets the user rename a meeting from the Meeting Detail view - the SDK's
+ * own window title (e.g. a generic "Zoom Meeting") isn't always a useful
+ * name, and some platforms/windows don't carry one at all.
+ */
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const body = (await request.json().catch(() => ({}))) as PatchMeetingBody;
+
+  const meetingTitle = body.meetingTitle?.trim();
+  if (!meetingTitle) {
+    return NextResponse.json({ error: "meetingTitle is required" }, { status: 400 });
+  }
+
+  try {
+    const meeting = await prisma.meeting.update({
+      where: { id },
+      data: { meetingTitle },
+    });
+    return NextResponse.json({ meeting: { id: meeting.id, meetingTitle: meeting.meetingTitle } });
+  } catch (error) {
+    console.error(`[meetings/:id] Failed to update meeting=${id}`, error);
+    return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+  }
+}

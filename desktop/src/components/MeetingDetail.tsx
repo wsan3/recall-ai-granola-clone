@@ -3,6 +3,7 @@ import type { MeetingDetail as MeetingDetailData } from "../ipcEvents";
 import { NotesPanel } from "./NotesPanel";
 import { TranscriptPanel } from "./TranscriptPanel";
 import { StatusBadge } from "./StatusBadge";
+import { EditableTitle } from "./EditableTitle";
 
 type DetailState =
   | { phase: "loading" }
@@ -52,9 +53,17 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
         {state.phase === "loaded" && (
           <>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-medium text-gray-800">
-                {state.meeting.meetingTitle ?? "Untitled meeting"}
-              </div>
+              <EditableTitle
+                meetingId={state.meeting.id}
+                title={state.meeting.meetingTitle}
+                onSaved={(meetingTitle) =>
+                  setState((current) =>
+                    current.phase === "loaded"
+                      ? { ...current, meeting: { ...current.meeting, meetingTitle } }
+                      : current
+                  )
+                }
+              />
               <div className="truncate text-xs text-gray-500">
                 {state.meeting.platform ?? "Unknown platform"} · {new Date(state.meeting.createdAt).toLocaleString()}
               </div>
@@ -81,7 +90,7 @@ export function MeetingDetail({ meetingId, onBack }: { meetingId: string; onBack
             </div>
           )}
 
-          <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
+          <div className="grid min-h-0 flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
             <NotesPanel noteBlocks={state.meeting.noteBlocks} onCitationClick={handleCitationClick} />
             <TranscriptPanel
               utterances={state.meeting.utterances}

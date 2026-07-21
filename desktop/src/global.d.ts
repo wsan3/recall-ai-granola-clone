@@ -5,6 +5,7 @@ import type {
   ListMeetingsResult,
   MeetingChannelPayload,
   SdkEventPayload,
+  UpdateMeetingTitleResult,
 } from "./ipcEvents";
 
 declare global {
@@ -15,6 +16,7 @@ declare global {
       finishMeeting(payload: FinishMeetingRequest): Promise<FinishMeetingResponse>;
       listMeetings(): Promise<ListMeetingsResult>;
       getMeeting(meetingId: string): Promise<GetMeetingResult>;
+      updateMeetingTitle(meetingId: string, meetingTitle: string): Promise<UpdateMeetingTitleResult>;
     };
   }
 }

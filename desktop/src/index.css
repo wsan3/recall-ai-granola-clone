@@ -6,6 +6,12 @@ html,
 body,
 #root {
   height: 100%;
+  /* Belt-and-suspenders: internal panels manage their own scroll (see the
+     min-h-0 chain in App.tsx/Notepad/TranscriptFeed). If that chain is ever
+     broken again by a future change, this stops the whole window from
+     scrolling instead of the intended panel - which was reported as
+     "I lose my position while taking notes as the transcript grows". */
+  overflow: hidden;
 }
 
 body {

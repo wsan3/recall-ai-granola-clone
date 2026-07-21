@@ -99,3 +99,5 @@ export type MeetingDetail = Omit<MeetingSummary, "noteBlockCount"> & {
 export type ListMeetingsResult = { status: "ok"; meetings: MeetingSummary[] } | { status: "error"; error: string };
 
 export type GetMeetingResult = { status: "ok"; meeting: MeetingDetail } | { status: "error"; error: string };
+
+export type UpdateMeetingTitleResult = { status: "ok" } | { status: "error"; error: string };

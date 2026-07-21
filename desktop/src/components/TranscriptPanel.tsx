@@ -16,9 +16,9 @@ export function TranscriptPanel({
   registerRef: (utteranceId: string, el: HTMLDivElement | null) => void;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <h2 className="mb-2 text-sm font-semibold text-gray-500">Transcript</h2>
-      <div className="flex-1 space-y-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
+      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3">
         {utterances.length === 0 && (
           <p className="text-sm text-gray-400">No transcript was captured for this meeting.</p>
         )}

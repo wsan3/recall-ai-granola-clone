@@ -45,7 +45,7 @@ export function App() {
         <>
           <RecordingBanner phase={session.phase} meetingWindow={session.window} errorMessage={session.errorMessage} />
 
-          <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
+          <div className="grid min-h-0 flex-1 grid-cols-2 gap-4 overflow-hidden p-4">
             <Notepad value={notes} onChange={setNotes} />
             <TranscriptFeed
               transcript={session.transcript}
