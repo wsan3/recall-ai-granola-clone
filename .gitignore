@@ -1,0 +1,45 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+out/
+build/
+.next/
+.turbo/
+.webpack/
+.vite/
+
+# Electron Forge
+desktop/out/
+desktop/.webpack/
+
+# Database
+*.db
+*.db-journal
+prisma/dev.db*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Env/tunnel artifacts
+.ngrok2/
