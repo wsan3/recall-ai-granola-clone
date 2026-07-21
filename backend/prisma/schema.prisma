@@ -1,0 +1,76 @@
+// Prisma schema for the Granola clone backend.
+// See docs/architecture.md at the repo root for the full data-flow context.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum MeetingStatus {
+  recording
+  processing
+  ready
+  failed
+}
+
+enum NoteSource {
+  user
+  ai
+}
+
+model Meeting {
+  id            String        @id @default(uuid())
+  sdkUploadId   String?       @unique
+  recordingId   String?       @unique
+  windowId      String?
+  meetingUrl    String?
+  meetingTitle  String?
+  platform      String?
+  status        MeetingStatus @default(recording)
+  videoUrl      String?
+  createdAt     DateTime      @default(now())
+  endedAt       DateTime?
+
+  utterances        Utterance[]
+  participantEvents ParticipantEvent[]
+  noteBlocks        NoteBlock[]
+}
+
+model Utterance {
+  id          String   @id @default(uuid())
+  meetingId   String
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  speakerName String?
+  text        String
+  startMs     Int
+  endMs       Int?
+
+  @@index([meetingId])
+}
+
+model ParticipantEvent {
+  id              String   @id @default(uuid())
+  meetingId       String
+  meeting         Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  type            String
+  participantName String?
+  timestamp       DateTime @default(now())
+
+  @@index([meetingId])
+}
+
+model NoteBlock {
+  id                 String     @id @default(uuid())
+  meetingId          String
+  meeting            Meeting    @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  order               Int
+  source             NoteSource
+  text               String
+  sourceUtteranceIds String     @default("[]") // JSON-encoded array of Utterance ids
+
+  @@index([meetingId])
+}

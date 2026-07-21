@@ -18,13 +18,14 @@ docs/       Product background and architecture notes
 
 ## Setup
 
-1. Copy `.env.example` to `.env` and fill in:
+1. In `backend/`, copy `.env.example` to `.env` and fill in:
    - `RECALL_API_KEY` — from the [Recall dashboard](https://us-west-2.recall.ai/dashboard/developers/api-keys) for your region
    - `RECALL_REGION` — must match the API key's region (`us-west-2`, `us-east-1`, `eu-central-1`, or `ap-northeast-1`)
    - `RECALL_WORKSPACE_VERIFICATION_SECRET` — created in the same dashboard, used to verify incoming webhooks
    - `PUBLIC_API_BASE_URL` — a stable public URL for the backend (a static ngrok domain works for local dev)
    - `OPENAI_API_KEY` — used for the post-call notes synthesis pass
-2. See `backend/README.md` and `desktop/README.md` (added as those pieces are built) for how to run each half of the app.
+2. `cd backend && npm install && npx prisma migrate dev && npm run dev` — starts the backend on `http://localhost:3000`. Verify with `curl http://localhost:3000/api/health`.
+3. See `desktop/README.md` (added once that piece is built) for how to run the Electron client.
 
 ## Why the Desktop SDK instead of a Meeting Bot
 
