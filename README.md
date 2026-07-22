@@ -12,10 +12,6 @@ A demo AI meeting notepad, in the spirit of [Granola](docs/granola.md), built to
 
 Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's **Desktop Recording SDK** to detect and capture meetings locally, without ever adding a visible participant to the call — matching how Granola itself actually works.
 
-### Why Granola, specifically
-
-A meeting bot is the fastest way to demo "Recall can capture a call," but a lot of Recall's actual customers — teams building AI meeting-intelligence products for sales, user research, recruiting, or standups — are building something closer to Granola: a personal notetaker their end users trust enough to run in _every_ call, including ones where a visible "Meeting Notetaker" bot joining would be a non-starter (client calls, interviews, anything consent-sensitive). Granola is the sharpest existing example of that category, so cloning it is also the sharpest way to demo the specific Recall primitive — the Desktop SDK — that those customers actually need, rather than a generic recorder any Bot-API demo could have shown.
-
 ## What it does
 
 1. Launch the desktop app. It detects when you join a call (Zoom or Google Meet) and starts recording automatically — no bot, no admission prompt, nothing visible in the call.
