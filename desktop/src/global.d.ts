@@ -1,4 +1,5 @@
 import type {
+  DeleteMeetingResult,
   FinishMeetingRequest,
   FinishMeetingResponse,
   GetMeetingResult,
@@ -20,6 +21,7 @@ declare global {
         meetingId: string,
         meetingTitle: string
       ): Promise<UpdateMeetingTitleResult>;
+      deleteMeeting(meetingId: string): Promise<DeleteMeetingResult>;
     };
   }
 }

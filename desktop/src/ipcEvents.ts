@@ -107,3 +107,5 @@ export type GetMeetingResult =
   { status: "ok"; meeting: MeetingDetail } | { status: "error"; error: string };
 
 export type UpdateMeetingTitleResult = { status: "ok" } | { status: "error"; error: string };
+
+export type DeleteMeetingResult = { status: "ok" } | { status: "error"; error: string };

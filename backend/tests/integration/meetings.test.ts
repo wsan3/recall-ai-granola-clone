@@ -132,3 +132,39 @@ describe("PATCH /api/meetings/:id", () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe("DELETE /api/meetings/:id", () => {
+  it("deletes a meeting along with its utterances and note blocks", async () => {
+    const meeting = await prisma.meeting.create({ data: { meetingTitle: "To delete" } });
+    const utterance = await prisma.utterance.create({
+      data: { meetingId: meeting.id, speakerName: "Alex", text: "hello", startMs: 0 },
+    });
+    await prisma.noteBlock.create({
+      data: {
+        meetingId: meeting.id,
+        order: 0,
+        source: "ai",
+        text: "note",
+        sourceUtteranceIds: JSON.stringify([utterance.id]),
+      },
+    });
+
+    const { DELETE } = await import("@/app/api/meetings/[id]/route");
+    const response = await DELETE(getRequest(`http://localhost/api/meetings/${meeting.id}`), {
+      params: Promise.resolve({ id: meeting.id }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await prisma.meeting.findUnique({ where: { id: meeting.id } })).toBeNull();
+    expect(await prisma.utterance.findUnique({ where: { id: utterance.id } })).toBeNull();
+    expect(await prisma.noteBlock.count({ where: { meetingId: meeting.id } })).toBe(0);
+  });
+
+  it("returns 404 for a meeting that does not exist", async () => {
+    const { DELETE } = await import("@/app/api/meetings/[id]/route");
+    const response = await DELETE(getRequest("http://localhost/api/meetings/does-not-exist"), {
+      params: Promise.resolve({ id: "does-not-exist" }),
+    });
+    expect(response.status).toBe(404);
+  });
+});

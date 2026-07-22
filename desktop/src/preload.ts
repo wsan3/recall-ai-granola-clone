@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type {
+  DeleteMeetingResult,
   FinishMeetingRequest,
   FinishMeetingResponse,
   GetMeetingResult,
@@ -33,4 +34,6 @@ contextBridge.exposeInMainWorld("recall", {
     meetingTitle: string
   ): Promise<UpdateMeetingTitleResult> =>
     ipcRenderer.invoke("update-meeting-title", meetingId, meetingTitle),
+  deleteMeeting: (meetingId: string): Promise<DeleteMeetingResult> =>
+    ipcRenderer.invoke("delete-meeting", meetingId),
 });

@@ -74,3 +74,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
   }
 }
+
+/**
+ * Lets the user delete a past meeting from the Meetings list. Cascades to
+ * its utterances/participantEvents/noteBlocks via the schema's onDelete:
+ * Cascade relations (see backend/prisma/schema.prisma).
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  try {
+    await prisma.meeting.delete({ where: { id } });
+    return NextResponse.json({ status: "ok" });
+  } catch (error) {
+    console.error(`[meetings/:id] Failed to delete meeting=${id}`, error);
+    return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+  }
+}

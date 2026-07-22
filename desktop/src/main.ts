@@ -4,6 +4,7 @@ import started from "electron-squirrel-startup";
 import RecallAiSdk, { type MeetingDetectedEvent } from "@recallai/desktop-sdk";
 import { BACKEND_URL, RECALL_API_URL } from "./config";
 import type {
+  DeleteMeetingResult,
   FinishMeetingRequest,
   FinishMeetingResponse,
   GetMeetingResult,
@@ -156,6 +157,24 @@ function registerIpcHandlers() {
         return { status: "ok" };
       } catch (error) {
         console.error("[main] Failed to update meeting title", error);
+        return { status: "error", error: String(error) };
+      }
+    }
+  );
+
+  ipcMain.handle(
+    "delete-meeting",
+    async (_event, meetingId: string): Promise<DeleteMeetingResult> => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/meetings/${meetingId}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          throw new Error(`Backend returned ${response.status}: ${await response.text()}`);
+        }
+        return { status: "ok" };
+      } catch (error) {
+        console.error("[main] Failed to delete meeting", error);
         return { status: "error", error: String(error) };
       }
     }
