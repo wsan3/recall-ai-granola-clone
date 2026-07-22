@@ -11,6 +11,7 @@ docs/implementation-plan.md
 docs/recall-doc-gaps.md
 docs/decisions.md
 docs/challenges.md
+demo-script.md
 
 # Dependencies
 node_modules/
