@@ -5,7 +5,7 @@ API-only Next.js app. Issues Recall.ai Desktop SDK upload tokens, receives Recal
 ## Setup
 
 ```bash
-cp .env.example .env   # then fill in RECALL_API_KEY, RECALL_WORKSPACE_VERIFICATION_SECRET, OPENAI_API_KEY, etc.
+cp -n .env.example .env   # -n: won't overwrite .env if it already exists - then fill in RECALL_API_KEY, RECALL_WORKSPACE_VERIFICATION_SECRET, OPENAI_API_KEY, etc.
 npm install
 npx prisma migrate dev
 npm run dev

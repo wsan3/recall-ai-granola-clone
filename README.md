@@ -50,10 +50,14 @@ make setup
 **1. Backend config**
 
 ```bash
-cd backend && cp .env.example .env   # then fill in the values below
+cd backend && cp -n .env.example .env   # -n: won't overwrite .env if it already exists - then fill in the values below
 cd ..
-make migrate                          # creates the local SQLite schema
+make migrate                             # creates the local SQLite schema
 ```
+
+> **Careful:** always keep the `-n` flag. Plain `cp .env.example .env` silently
+> overwrites an existing `.env` with the blank template - there's no backup and
+> no warning, and any secrets you'd already filled in are gone for good.
 
 Fill in `backend/.env`:
 
