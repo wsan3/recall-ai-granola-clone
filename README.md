@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/granola-clone-logo.png" alt="Granola clone logo" width="140" />
+  <img src="assets/granola-clone-logo.png" alt="Granola clone logo" width="420" />
 </p>
 
 # Granola Clone — built on Recall.ai's Desktop Recording SDK
