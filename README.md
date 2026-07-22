@@ -39,20 +39,18 @@ Makefile    Every setup/lint/typecheck/test/format command below, and what CI ru
 
 ## Setup
 
-You'll run three things locally: the backend, a public tunnel to it (for Recall's webhook), and the desktop app.
-
-`make setup` installs both projects' dependencies plus the root-level git
-hooks in one shot; the individual `npm install` steps below do the same
-thing per-project if you'd rather run them by hand.
-
-**1. Backend**
+You'll run three things locally: the backend, a public tunnel to it (for Recall's webhook), and the desktop app. `make setup` installs both projects' dependencies plus the root-level git hooks in one shot (equivalent to running `npm install` in `backend/`, `desktop/`, and the repo root).
 
 ```bash
-cd backend
-cp .env.example .env   # fill in the values below
-npm install             # also generates the Prisma client (postinstall)
-npx prisma migrate dev
-npm run dev             # http://localhost:3000
+make setup
+```
+
+**1. Backend config**
+
+```bash
+cd backend && cp .env.example .env   # then fill in the values below
+cd ..
+make migrate                          # creates the local SQLite schema
 ```
 
 Fill in `backend/.env`:
@@ -60,10 +58,8 @@ Fill in `backend/.env`:
 - `RECALL_API_KEY` — from the [Recall dashboard](https://us-west-2.recall.ai/dashboard/developers/api-keys) for your region
 - `RECALL_REGION` — must match the API key's region (`us-west-2`, `us-east-1`, `eu-central-1`, or `ap-northeast-1`)
 - `RECALL_WORKSPACE_VERIFICATION_SECRET` — same dashboard, used to verify incoming webhooks
-- `PUBLIC_API_BASE_URL` — a stable public URL for the backend (see step 2)
+- `PUBLIC_API_BASE_URL` — a stable public URL for the backend (see step 2 below)
 - `OPENAI_API_KEY` — used for the post-call notes synthesis pass
-
-Verify: `curl http://localhost:3000/api/health` returns `{"status":"ok", ...}`.
 
 **2. Public tunnel + webhook subscription**
 
@@ -73,19 +69,33 @@ Recall needs a public URL to deliver the `sdk_upload.*` webhook to. In local dev
 ngrok http --domain=<your-static-domain> 3000
 ```
 
-Then, in the Recall dashboard, create a webhook endpoint pointing at `https://<your-domain>/api/webhooks/recall`, subscribed to `sdk_upload.complete`, `sdk_upload.uploading`, and `sdk_upload.failed`. Set `PUBLIC_API_BASE_URL` in `backend/.env` to that same domain and restart the backend.
-
-**3. Desktop app**
-
-```bash
-cd desktop
-npm install
-npm start   # backend must already be running
-```
+Then, in the Recall dashboard, create a webhook endpoint pointing at `https://<your-domain>/api/webhooks/recall`, subscribed to `sdk_upload.complete`, `sdk_upload.uploading`, and `sdk_upload.failed`. Set `PUBLIC_API_BASE_URL` in `backend/.env` to that same domain.
 
 See [`desktop/README.md`](desktop/README.md) for macOS permissions setup (required once, in dev mode) and app structure.
 
-> **Dev note:** if you add or change an `ipcMain.handle`/event listener in `desktop/src/main.ts`, fully restart `npm start` (kill the process, don't rely on the Vite hot-reload log line). Electron's `app.on("ready")` only fires once per real OS process, so newly-registered handlers won't take effect until a real restart — a stale process will throw `No handler registered for '<channel>'` when the renderer calls it.
+## Running the app
+
+Once setup is done, every day-to-day run looks like this — three things, each in
+its own terminal:
+
+```bash
+make dev-backend     # terminal 1 — Next.js on http://localhost:3000
+ngrok http --domain=<your-static-domain> 3000   # terminal 2 (skip if already running)
+make dev-desktop      # terminal 3 — opens the Electron window
+```
+
+Verify the backend came up before starting the desktop app: `curl http://localhost:3000/api/health` should return `{"status":"ok", ...}`.
+
+Then:
+
+1. **Grant OS permissions** (macOS, once per machine) — the Electron window will prompt for microphone, screen recording, and accessibility access the first time it starts. See [`desktop/README.md`](desktop/README.md) if the prompts don't show up as expected in dev mode.
+2. **Join a call** — start or join a meeting in Zoom Desktop or Google Meet (Chrome). The app detects the meeting window automatically and starts recording; no bot joins the call and nothing changes for other participants.
+3. **Watch it work** — the "Live meeting" tab fills in with a live transcript (speaker labels + a "who's talking" indicator) as people talk. Type your own quick notes in the left panel as you go.
+4. **End the call** — once the meeting window closes, the banner shows "wrapping up…" while the transcript + your notes are sent to the backend for AI synthesis, then the app jumps straight to that meeting's detail view.
+5. **Review the notes** — your notes appear in black, the AI-expanded notes in gray underneath. Click any gray note to seek the embedded recording to that moment and highlight the transcript lines it came from.
+6. **Revisit anytime** — the "Past meetings" tab lists every recorded meeting; click one to reopen its detail view, or click its title to rename it.
+
+> **Dev note:** if you add or change an `ipcMain.handle`/event listener in `desktop/src/main.ts`, fully restart `make dev-desktop` (kill the process, don't rely on the Vite hot-reload log line). Electron's `app.on("ready")` only fires once per real OS process, so newly-registered handlers won't take effect until a real restart — a stale process will throw `No handler registered for '<channel>'` when the renderer calls it.
 
 ## Testing & CI
 

@@ -1,4 +1,5 @@
 .PHONY: setup setup-backend setup-desktop \
+	migrate \
 	dev-backend dev-desktop \
 	lint lint-backend lint-desktop \
 	typecheck typecheck-backend typecheck-desktop \
@@ -9,7 +10,8 @@
 	ci clean
 
 # Installs dependencies for both npm projects (backend/, desktop/) plus the
-# root-level git hooks (husky). Run this first on a fresh clone.
+# root-level git hooks (husky). Run this first on a fresh clone. Still needs
+# backend/.env (see README.md) and `make migrate` before `make dev-backend`.
 setup: setup-backend setup-desktop
 	npm install
 
@@ -18,6 +20,12 @@ setup-backend:
 
 setup-desktop:
 	cd desktop && npm install
+
+# Creates/updates the local SQLite schema. Needs backend/.env's DATABASE_URL
+# - run once after setup-backend, and again whenever prisma/schema.prisma
+# changes.
+migrate:
+	cd backend && npx prisma migrate dev
 
 # Runs the Next.js backend dev server. Needs backend/.env - see README.md.
 dev-backend:
