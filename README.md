@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/granola-clone-logo.png" alt="Granola clone logo" width="140" />
+</p>
+
 # Granola Clone — built on Recall.ai's Desktop Recording SDK
 
 [![CI](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml/badge.svg)](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml)

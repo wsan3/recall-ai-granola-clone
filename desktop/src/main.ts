@@ -33,6 +33,10 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 720,
+    // Only resolvable in dev, where src/ still sits next to the build output
+    // (see docs/architecture.md's packaging limitation) - fine for now since
+    // this app only runs unpacked.
+    icon: path.join(__dirname, "../../src/assets/granola-clone-logo.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },

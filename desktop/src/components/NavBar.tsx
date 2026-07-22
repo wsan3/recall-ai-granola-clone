@@ -1,3 +1,5 @@
+import logo from "../assets/granola-clone-logo.png";
+
 export type Screen =
   { name: "live" } | { name: "meetings" } | { name: "meeting-detail"; meetingId: string };
 
@@ -20,6 +22,7 @@ export function NavBar({
 
   return (
     <div className="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2">
+      <img src={logo} alt="Granola clone" className="mr-1 h-7 w-7 rounded-full" />
       <button
         className={tabClass(screen.name === "live")}
         onClick={() => onNavigate({ name: "live" })}
