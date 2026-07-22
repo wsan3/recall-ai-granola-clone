@@ -20,6 +20,12 @@ Unlike a typical "bot joins your call" meeting recorder, this app uses Recall's 
 4. The Meeting Detail view shows your own notes in black next to the AI-expanded notes in gray. Click any gray note and the embedded recording seeks to that moment while the transcript scrolls to and highlights the source lines.
 5. A Past Meetings list keeps every recorded meeting available to revisit.
 
+## Demo
+
+[![Watch the demo](https://cdn.loom.com/sessions/thumbnails/f6612cf9c91e4e3c987596fb79d272bd-a69dcd5fd68f6062.gif)](https://www.loom.com/share/f6612cf9c91e4e3c987596fb79d272bd)
+
+2-minute walkthrough: joining a Google Meet call with no bot in sight, live transcription, jotting notes, and the AI-expanded notes with click-to-seek citations after the call ends.
+
 ## Recall.ai features used
 
 - **Desktop Recording SDK** — meeting detection and capture with no visible participant
