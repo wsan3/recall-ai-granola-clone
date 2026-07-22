@@ -2,6 +2,7 @@
   "name": "backend",
   "version": "0.1.0",
   "private": true,
+  "description": "API-only Next.js backend for the Granola clone - issues Recall.ai Desktop SDK upload tokens, receives sdk_upload.* webhooks, runs the post-call AI notes synthesis pass, and persists everything via Prisma/SQLite",
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
