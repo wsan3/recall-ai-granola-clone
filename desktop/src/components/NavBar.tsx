@@ -12,11 +12,9 @@ function tabClass(active: boolean): string {
 export function NavBar({
   screen,
   onNavigate,
-  justFinishedMeetingId,
 }: {
   screen: Screen;
   onNavigate: (screen: Screen) => void;
-  justFinishedMeetingId: string | null;
 }) {
   const onPastMeetingsTab = screen.name === "meetings" || screen.name === "meeting-detail";
 
@@ -35,15 +33,6 @@ export function NavBar({
       >
         Past meetings
       </button>
-
-      {justFinishedMeetingId && (
-        <button
-          onClick={() => onNavigate({ name: "meeting-detail", meetingId: justFinishedMeetingId })}
-          className="ml-auto rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
-        >
-          View notes →
-        </button>
-      )}
     </div>
   );
 }

@@ -313,6 +313,66 @@ describe("useRecallSession reducer", () => {
     });
   });
 
+  describe("meeting-detected reset for a new meeting", () => {
+    it("clears transcript, participants, and meetingId left over from a finished meeting", () => {
+      const finishedState: State = {
+        ...initialState,
+        phase: "done",
+        meetingId: "old-meeting",
+        recordingStartedAtMs: Date.now() - 60_000,
+        transcript: [
+          { id: "line-1", participant: null, text: "leftover", isPartial: false, atMs: 100 },
+        ],
+        partialLine: {
+          id: "line-2",
+          participant: null,
+          text: "partial",
+          isPartial: true,
+          atMs: 200,
+        },
+        activeSpeakerIds: new Set(["1"]),
+        participantsById: new Map([["1", { id: "1", name: "Alex" }]]),
+        participantEvents: [{ type: "join", participantName: "Alex", atMs: 50 }],
+        errorMessage: null,
+      };
+
+      const state = reducer(finishedState, {
+        channel: "sdk-event",
+        payload: { type: "meeting-detected", window: WINDOW },
+      });
+
+      expect(state.phase).toBe("starting-recording");
+      expect(state.window).toEqual(WINDOW);
+      expect(state.meetingId).toBeNull();
+      expect(state.recordingStartedAtMs).toBeNull();
+      expect(state.transcript).toEqual([]);
+      expect(state.partialLine).toBeNull();
+      expect(state.activeSpeakerIds.size).toBe(0);
+      expect(state.participantsById.size).toBe(0);
+      expect(state.participantEvents).toEqual([]);
+    });
+
+    it("also clears leftover state after an error", () => {
+      const errorState: State = {
+        ...initialState,
+        phase: "error",
+        errorMessage: "network error",
+        transcript: [
+          { id: "line-1", participant: null, text: "leftover", isPartial: false, atMs: 0 },
+        ],
+      };
+
+      const state = reducer(errorState, {
+        channel: "sdk-event",
+        payload: { type: "meeting-detected", window: WINDOW },
+      });
+
+      expect(state.phase).toBe("starting-recording");
+      expect(state.errorMessage).toBeNull();
+      expect(state.transcript).toEqual([]);
+    });
+  });
+
   it("surfaces a top-level SDK error", () => {
     const state = reducer(initialState, {
       channel: "sdk-event",

@@ -140,7 +140,24 @@ export function reducer(state: State, action: Action): State {
         };
 
       case "meeting-detected":
-        return { ...state, phase: "starting-recording", window: payload.window, debugLog };
+        // A new meeting is starting - clear out everything scoped to
+        // whatever call happened before, so the Live Meeting panel starts
+        // from a blank slate instead of carrying over the previous
+        // meeting's transcript/participants.
+        return {
+          ...state,
+          phase: "starting-recording",
+          window: payload.window,
+          meetingId: null,
+          recordingStartedAtMs: null,
+          transcript: [],
+          partialLine: null,
+          activeSpeakerIds: new Set(),
+          participantsById: new Map(),
+          participantEvents: [],
+          errorMessage: null,
+          debugLog,
+        };
 
       case "meeting-updated":
         return { ...state, window: { ...state.window, ...payload.window }, debugLog };
@@ -243,9 +260,14 @@ export function useRecallSession() {
   const hasFinishedRef = useRef(false);
 
   useEffect(() => {
-    const offSdkEvent = window.recall.on("sdk-event", (payload) =>
-      dispatch({ channel: "sdk-event", payload })
-    );
+    const offSdkEvent = window.recall.on("sdk-event", (payload) => {
+      // Allow finishMeeting to run again for this new meeting - it's a
+      // one-shot latch per call, reset the moment a fresh one is detected.
+      if (payload.type === "meeting-detected") {
+        hasFinishedRef.current = false;
+      }
+      dispatch({ channel: "sdk-event", payload });
+    });
     const offMeeting = window.recall.on("meeting", (payload) =>
       dispatch({ channel: "meeting", payload })
     );

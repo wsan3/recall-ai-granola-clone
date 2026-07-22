@@ -33,13 +33,25 @@ export function App() {
     }
   }, [session.phase, session.meetingId]);
 
+  // A new meeting starting (phase leaving one of the "settled" states below
+  // and re-entering "starting-recording") means the Live Meeting panel is
+  // about to show a different call - clear the notepad so it starts blank
+  // instead of carrying over the previous meeting's notes.
+  const previousPhaseRef = useRef(session.phase);
+  useEffect(() => {
+    const previousPhase = previousPhaseRef.current;
+    const isFreshMeeting =
+      session.phase === "starting-recording" &&
+      (previousPhase === "ended" || previousPhase === "done" || previousPhase === "error");
+    if (isFreshMeeting) {
+      setNotes("");
+    }
+    previousPhaseRef.current = session.phase;
+  }, [session.phase]);
+
   return (
     <div className="flex h-full flex-col bg-gray-100">
-      <NavBar
-        screen={screen}
-        onNavigate={setScreen}
-        justFinishedMeetingId={session.phase === "done" ? session.meetingId : null}
-      />
+      <NavBar screen={screen} onNavigate={setScreen} />
 
       {screen.name === "live" && (
         <>
