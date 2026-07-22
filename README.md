@@ -2,9 +2,11 @@
   <img src="assets/granola-clone-logo.png" alt="Granola clone logo" width="420" />
 </p>
 
-# Granola Clone — built on Recall.ai's Desktop Recording SDK
+# Granola Clone
 
 [![CI](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml/badge.svg)](https://github.com/wsan3/recall-ai-granola-clone/actions/workflows/ci.yml)
+
+Built on Recall.ai's Desktop Recording SDK
 
 A demo AI meeting notepad, in the spirit of [Granola](docs/granola.md), built to showcase [Recall.ai](https://recall.ai)'s meeting platform for prospective customers building similar products.
 
